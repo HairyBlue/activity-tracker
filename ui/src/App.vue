@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { userStore } from './store/userStore';
+userStore().checkIfPersist();
 // import { onMounted, ref, onUnmounted } from 'vue';
 
 // const isMobileOrTablet = ref<boolean>(false);
@@ -13,12 +15,12 @@
 // });
 </script>
 <template>
-    <!-- <div v-if="isMobileOrTablet" class="text-center">
+  <!-- <div v-if="isMobileOrTablet" class="text-center">
         <h1>Please use laptop or desktop to access the Activity Tracker</h1>
     </div>
     <div v-else> -->
-    <!-- </div> -->
+  <!-- </div> -->
 
-    <router-view></router-view>
+  <router-view></router-view>
 </template>
 ;

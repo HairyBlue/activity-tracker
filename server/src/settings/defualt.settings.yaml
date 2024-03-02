@@ -8,3 +8,15 @@ settings:
       - '$2b$10$B5bNJVUat6a8ol4nMISQSuOn6akOSGZjGeIfIUFaJR4qX1iX1tLdm'
   secret: "8d9265aa67d404e787a7be9c09be06db56563701fda19de54d26869d5888285a38eb087045e484e25b04886ddb214cd169a42120252f6a105e7166628db90149"
 # randomBytes(64).toString('hex');
+db:
+  host: 'localhost'
+  user: 'root'
+  database: 'tracker'
+  waitForConnections: true
+  connectionLimit: 10
+  maxIdle: 10
+  idleTimeout: 60000
+  queueLimit: 0
+  enableKeepAlive: true
+  keepAliveInitialDelay: 0
+    

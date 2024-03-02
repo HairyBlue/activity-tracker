@@ -4,9 +4,9 @@ import SideNav from '../components/SideNav.vue';
 </script>
 
 <template>
-    <Header />
-    <main class="flex">
-        <SideNav />
-        <div class="mt-14 w-full text-center">Manage</div>
-    </main>
+  <Header />
+  <main class="flex">
+    <SideNav />
+    <div class="mt-14 w-full text-center">Manage</div>
+  </main>
 </template>

@@ -5,11 +5,11 @@ import ActivityComponent from '../components/ActivityComponent.vue';
 </script>
 
 <template>
-    <Header />
-    <main>
-        <SideNav />
-        <div class="text-cente mt-12 w-full pl-16">
-            <ActivityComponent />
-        </div>
-    </main>
+  <Header />
+  <main>
+    <SideNav />
+    <div class="text-cente mt-12 w-full pl-16">
+      <ActivityComponent />
+    </div>
+  </main>
 </template>
