@@ -1,33 +1,10 @@
 require("source-map-support").install();
-import * as express from "express";
 import * as http from "http";
-import * as path from "path";
-
-import * as loginroute from "./auth"
-import * as acitivityroute from "./activity"
-import * as middleware from "./utils/verifyClient"
-
-import * as logging from "./utils/logger"
-
-const logger = logging.wichFileToLog("app")
-const app = express();
+import * as logging from "./utils/logger";
+import { createRoutes } from "./createRoutes";
+const logger = logging.wichFileToLog("app");
+const app = createRoutes();
 const server = http.createServer(app);
-const verifyClient = middleware.verifyClient
-
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
-
-app.use(function (req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With,content-type");
-  //res.setHeader('Access-Control-Allow-Credentials', true);
-  next();
-});
-
-// * ROUTES
-app.use("/api", loginroute.router)
-app.use("/api", verifyClient, acitivityroute.router)
 
 process
   .on("unhandledRejection", (reason, p) => {

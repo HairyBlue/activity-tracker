@@ -40,18 +40,16 @@ function wichFileToLog(filename: string) {
             let msg = util.format.apply({}, args)
             logger.log("warn", {filename, message: msg})
         },
-        info: function (...args: any[]) {
+        info: function (...args: any) {
             let msg = util.format.apply({}, args)
             logger.log("info", {filename, message: msg})
         },
-        error: function (...args: any[]) {
+        error: function (...args: any) {
             let msg = util.format.apply({}, args)
             logger.log("error", {filename, message: msg })
         }
     }
 }
-
-
 
 export { 
     wichFileToLog
