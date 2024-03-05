@@ -1,7 +1,7 @@
 require("source-map-support").install();
 import * as http from "http";
 import * as logging from "./utils/logger";
-import { createRoutes } from "./createRoutes";
+import createRoutes from "./createRoutes";
 const logger = logging.wichFileToLog("app");
 const app = createRoutes();
 const server = http.createServer(app);

@@ -1,4 +1,4 @@
-import * as express from "express"
+import express = require("express")
 import * as path from "path";
 
 import * as loginroute from "./auth";
@@ -26,10 +26,13 @@ function createRoutes() {
     next();
   });
 
+  app.get("/api", function (req, res) {
+    res.sendStatus(200)
+  })
   // * ROUTES
   app.use("/api", loginroute.router);
   app.use("/api", verifyClient, acitivityroute.router);
 
   return app
 }
-export {createRoutes}
+export default createRoutes
