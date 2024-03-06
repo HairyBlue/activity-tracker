@@ -1,7 +1,7 @@
 import * as jwt from "jsonwebtoken";
 import * as express from "express";
 import * as settings from "./settings";
-import * as logging from "../utils/logger";
+import * as logging from "./logger";
 const logger = logging.wichFileToLog("verifyClient");
 
 const defaults = settings.defaultSettings;
@@ -32,7 +32,7 @@ const verifyClient = (
           res.sendStatus(403);
           return;
         } else {
-          (req as GetUserRequest ).user = decode.emailOrUsername;
+          (req as GetUserRequest).user = decode.emailOrUsername;
           next();
         }
       }

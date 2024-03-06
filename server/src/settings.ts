@@ -4,7 +4,7 @@ import * as fs from "fs";
 
 const defaultSettings = yaml.load(
   fs.readFileSync(
-    path.join(__dirname, "../settings/defualt.settings.yaml"),
+    path.join(__dirname, "./settings/defualt.settings.yaml"),
     "utf-8"
   )
 ) as any;

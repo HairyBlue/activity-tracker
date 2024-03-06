@@ -1,5 +1,5 @@
 import * as express from "express";
-import * as logging from "./utils/logger";
+import * as logging from "./logger";
 
 interface GetUserRequest extends express.Request {
   user?: string;
@@ -7,7 +7,6 @@ interface GetUserRequest extends express.Request {
 const logger = logging.wichFileToLog("club");
 const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
-
 
 router.get("/clun", function (req, res) {});
 

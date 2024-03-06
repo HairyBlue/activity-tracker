@@ -1,5 +1,5 @@
 import * as express from "express";
-import * as logging from "./utils/logger";
+import * as logging from "./logger";
 
 const logger = logging.wichFileToLog("activity");
 const router = express.Router();

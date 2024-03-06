@@ -1,8 +1,8 @@
 import * as express from "express";
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
-import * as settings from "./utils/settings";
-import * as logging from "./utils/logger";
+import * as settings from "./settings";
+import * as logging from "./logger";
 
 const logger = logging.wichFileToLog("auth");
 
@@ -23,7 +23,7 @@ router.post("/login", function (req, res) {
           { emailOrUsername: emailOrUsername },
           defaults.settings.secret
         );
-        login = true
+        login = true;
         logger.info(`Login success by ${emailOrUsername}`);
         res.status(200).json({ message: "success", token: token });
       }

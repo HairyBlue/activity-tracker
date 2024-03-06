@@ -1,6 +1,6 @@
 import { expect } from "@jest/globals";
 
-import * as defaults from "../src/utils/settings";
+import * as defaults from "../../src/settings";
 
 // TODO Need to remove if need to use env config
 describe("check default setting yaml where defined", function () {
