@@ -1,26 +1,36 @@
 # Activity Tracker
 
-## What is this
+## Purpose
+
 This repo serve as my project on 'Software Engeenering 1' subject
 Main purpose is to track activities on clubs and organization for schools
 
-## Installation
+## Project Setup
+
+### Installation
 
 ```bash
-npm install
+npm install --prefix server
+npm install --prefix ui
 ```
 
-## Usage
+### Build
 
-### Server
 ```bash
-cd server
-npm run build
-node dist/app.js
+npm run build --prefix server
+npm run build --prefix ui
 ```
 
-### UI
+### Test
+
 ```bash
-cd ui
-npm run dev
+npm test --prefix server
+```
+
+### Usage
+
+```bash
+cp -r ui/dist server/dist/public
+cd server/dist
+node app.js
 ```

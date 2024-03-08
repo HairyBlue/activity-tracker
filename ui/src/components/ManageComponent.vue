@@ -7,7 +7,7 @@ import ButtonSubmit from './globals/buttons/ButtonSubmit.vue';
 import ButtonCancel from './globals/buttons/ButtonCancel.vue';
 // deps
 import { userStore } from '../store/userStore';
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import $ from 'jquery';
 const user = userStore();
 
@@ -351,9 +351,9 @@ onUnmounted(() => {
               </tr>
               <!--  -->
               <!--  -->
-              <tr v-if="targetCard == 'target-activity'" v-for="(row, idx) in rows" :class="idx % 2 == 1 ? 'grayed-out' : ''">
+              <!-- <tr v-if="targetCard == 'target-activity'" v-for="(row, idx) in rows" :class="idx % 2 == 1 ? 'grayed-out' : ''">
                 <td></td>
-              </tr>
+              </tr> -->
               <!--  -->
               <!--  -->
             </tbody>
