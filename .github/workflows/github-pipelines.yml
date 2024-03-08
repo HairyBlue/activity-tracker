@@ -1,4 +1,4 @@
-name: Activity Tracker CI/CS Pipeline
+name: Activity Tracker CI/CD Pipeline
 
 on:
   push:
