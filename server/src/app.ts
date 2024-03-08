@@ -17,7 +17,7 @@ process
     process.exit(1);
   });
 
-server.listen(3500, () => {
+server.listen(3500, "0.0.0.0", () => {
   console.log("server is running");
 });
 
