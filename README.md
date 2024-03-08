@@ -34,3 +34,15 @@ cp -r ui/dist server/dist/public
 cd server/dist
 node app.js
 ```
+
+## Using with PM2 and PM2 Windows Service
+
+[reference for the pm2 setup](https://profoundlogicsupport.atlassian.net/wiki/spaces/PUI/pages/164514058/Autostart+Profoundjs+with+PM2#Installing-PM2)
+
+### Usage
+
+```bash
+cd server
+pm2 start pm2.config.js
+pm2 save
+```
