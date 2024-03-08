@@ -1,21 +1,19 @@
 import { defineStore } from 'pinia';
 import router from '../router';
-let userPresist: any =
-
-setInterval(() => {
-  userPresist =  localStorage.getItem('activity_tracker_presist');
-}, 500)
 
 export const userStore = defineStore('userSore', function () {
-  function getToken() {
-    if (userPresist) {
-      return JSON.parse(userPresist).user.token;
-    }
-      
-  }
+  const userPresist = localStorage.getItem('activity_tracker_presist');
   function checkIfPersist() {
     if (!userPresist) router.push('/');
   }
+
+  function getToken() {
+    checkIfPersist();
+    if (userPresist) {
+      return JSON.parse(userPresist).user.token;
+    }
+  }
+
   return {
     getToken,
     checkIfPersist,

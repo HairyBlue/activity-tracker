@@ -214,11 +214,7 @@ onUnmounted(() => {
           </tr>
         </thead>
         <tbody class="text-[10px]">
-          <tr
-            v-for="(data, idx) in activity_data"
-            :key="idx"
-            class="text-center"
-            :class="idx % 2 == 1 ? 'grayed-out' : ''">
+          <tr v-for="(data, idx) in activity_data" :key="idx" class="text-center" :class="idx % 2 == 1 ? 'grayed-out' : ''">
             <td>{{ data.clubName }}</td>
             <td>{{ data.activityName }}</td>
             <td>{{ data.categoryName }}</td>

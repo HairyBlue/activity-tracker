@@ -8,7 +8,7 @@ import ActivityComponent from '../components/ActivityComponent.vue';
   <Header />
   <main>
     <SideNav />
-    <div class="text-cente mt-12 w-full pl-16">
+    <div class="mt-12 w-full pl-16">
       <ActivityComponent />
     </div>
   </main>

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { userStore } from './store/userStore';
-userStore().checkIfPersist();
 // import { onMounted, ref, onUnmounted } from 'vue';
 
 // const isMobileOrTablet = ref<boolean>(false);

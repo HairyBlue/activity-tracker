@@ -30,7 +30,7 @@ aside {
   align-items: center;
   justify-content: center;
   width: 60px;
-  min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--white-color);
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
   position: fixed;

@@ -4,6 +4,7 @@ import * as path from "path";
 import * as loginroute from "./auth";
 import * as acitivityroute from "./activity";
 import * as middleware from "./verifyClient";
+import * as manageroute from "./manage";
 
 function createRoutes() {
   const app = express();
@@ -26,12 +27,10 @@ function createRoutes() {
     next();
   });
 
-  app.get("/api", function (req, res) {
-    res.sendStatus(200);
-  });
   // * ROUTES
   app.use("/api", loginroute.router);
   app.use("/api", verifyClient, acitivityroute.router);
+  app.use("/api", verifyClient, manageroute.router);
 
   return app;
 }

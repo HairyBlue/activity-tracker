@@ -5,7 +5,7 @@ import SideNav from '../components/SideNav.vue';
 
 <template>
   <Header />
-  <main class="flex">
+  <main>
     <SideNav />
     <div class="mt-14 w-full text-center">Clubs</div>
   </main>
