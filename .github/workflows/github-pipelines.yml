@@ -1,0 +1,31 @@
+name: Activity Tracker CI/CS Pipeline
+
+on:
+  push:
+    branches:
+      - master
+      - "tickets/*"
+      - "features/*"
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ["18.x"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{matrix.node-version}}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{matrix.node-version}}"
+      - name: Install dependencies for server
+        run: npm ci --prefix server
+
+      # - name: Build the server
+      #   run: npm run build --prefix server --if-present
+
+      - name: Test the server
+        run: npm test --prefix server
