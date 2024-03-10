@@ -3,26 +3,32 @@ version: "3.8"
 services:
   app:
     build: .
+    container_name: activity_tracker_app
     ports:
       - "3500:3500"
     depends_on:
       - db
+    env_file:
+      - .env
 
   db:
     image: mysql:latest
     restart: always
-    container_name: mydb
+    container_name: activity_tracker_db
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
-      - "3307:3307"
+      - "3306:3306"
     expose:
-      - "3307"
+      - "3306"
     volumes:
       - my-db:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - .env
 
 volumes:
   my-db:

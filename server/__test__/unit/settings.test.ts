@@ -1,35 +1,60 @@
 import { expect } from "@jest/globals";
 
-import * as defaults from "../../src/settings";
+import {defaults, defaultSecret, defaultUser, developmentDB, stagingDB} from "../../src/settings";
 
 // TODO Need to remove if need to use env config
 describe("check default setting yaml where defined", function () {
-  const user = defaults.defaultSettings.settings.user;
-  const secret = defaults.defaultSettings.settings.secret;
-  const db = defaults.defaultSettings.db;
 
-  it("should check settings", function () {
-    expect(typeof defaults.defaultSettings).toBe("object");
-  });
+  describe("check if there is a setting", function () {
+    it("should check settings", function () {
+      expect(typeof defaults).toBe("object");
+    });
+  })
 
-  // CHECK FOR USER
-  it("should check if has user", function () {
-    expect(user.length).toBeGreaterThan(0);
-  });
+  describe("check if there is a secret in setting", function () {
+    it("should check secret and greater that 16", function () {
+      expect(defaultSecret.length).toBeGreaterThan(16);
+    });
+  })
 
-  // CHECK FOR SECRET
-  it("should have secret", function () {
-    expect(secret.length).toBeGreaterThan(16);
-  });
+  describe("check if there is a user", function () {
+    it("should username not empty", function () {
+      expect(defaultUser.username.length).toBeGreaterThan(0);
+    });
+    it("should email not empty", function () {
+      expect(defaultUser.email.length).toBeGreaterThan(0);
+    });
+    it("should passwowrd not empty", function () {
+      expect(defaultUser.password.length).toBeGreaterThan(0);
+    });
+ })
 
-  // CHECK FOR DB CONFIG
-  it("should have db", function () {
-    expect(typeof db).toBe("object");
+  describe("check for development database", function () {
+    it("should have db", function () {
+       expect(typeof developmentDB).toBe("object");
+    });
+    it("should have config", function () {
+      expect(developmentDB.host).toBe("localhost" || "127.0.0.1");
+      expect(developmentDB.user).toBe("root");
+      expect(developmentDB.pasword).toBe("Hairyblue");
+      expect(developmentDB.name).toBe("activity_tracker");
+      expect(developmentDB.limit).toBeGreaterThan(15);
+    })
+  })
 
-    expect(db.host).toBe("localhost" || "127.0.0.1");
-    expect(db.user).toBe("root");
-    expect(db.password).toBe("Hairyblue" || "");
-    expect(db.database).toBe("tracker");
-    expect(db.connectionLimit).toBeGreaterThan(15);
-  });
+  describe("check for staging database", function () {
+    it("should have db", function () {
+      expect(typeof stagingDB).toBe("object");
+   });
+   it("should have config", function () {
+     expect(stagingDB.host).toBe("localhost" || "127.0.0.1");
+     expect(stagingDB.user).toBe("root");
+     expect(stagingDB.pasword).toBe("root");
+     expect(stagingDB.name).toBe("activity_tracker");
+     expect(stagingDB.limit).toBeGreaterThan(15);
+   })
+  })
+
+  // // CHECK FOR DB CONFIG
+
 });

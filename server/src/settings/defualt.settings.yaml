@@ -1,23 +1,26 @@
 settings:
   user:
-    -
-      - "super@admin.com"
-      - '$2b$10$FFeiGr5Dn1RPGTeVM50c0eqQhIc5RlaBGVtVTcdU6Z03iUp9BXPrq'
-    -
-      - "admin@admin.com"
-      - '$2b$10$B5bNJVUat6a8ol4nMISQSuOn6akOSGZjGeIfIUFaJR4qX1iX1tLdm'
+    username: "default"
+    email: "default@cjc.com"
+    password: '$2b$12$FrdKjw5R6a/X3k8j3GiBWeR87BXrBLt391QmQdO2rjrZmVqnb5Pii'
   secret: "8d9265aa67d404e787a7be9c09be06db56563701fda19de54d26869d5888285a38eb087045e484e25b04886ddb214cd169a42120252f6a105e7166628db90149"
-# randomBytes(64).toString('hex');
-db:
-  host: 'localhost'
-  user: 'root'
-  password: 'Hairyblue'
-  database: 'tracker'
-  waitForConnections: true
-  connectionLimit: 20
-  maxIdle: 10
-  idleTimeout: 60000
-  queueLimit: 0
-  enableKeepAlive: true
-  keepAliveInitialDelay: 0
-    
+  # randomBytes(64).toString('hex');
+  db:
+    development:
+      host: 'localhost'
+      user: 'root'
+      password: 'Hairyblue'
+      name: 'activity_tracker'
+      connectionLimit: 20
+      # waitForConnections: true
+      # maxIdle: 10
+      # idleTimeout: 60000
+      # queueLimit: 0
+      # enableKeepAlive: true
+      # keepAliveInitialDelay: 0
+    staging:
+      host: 'localhost'
+      user: 'root'
+      password: 'root'
+      name: 'activity_tracker'
+      connectionLimit: 20

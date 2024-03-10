@@ -1,38 +1,35 @@
 import * as express from "express";
-import * as bcrypt from "bcrypt";
-import * as jwt from "jsonwebtoken";
-import * as settings from "./settings";
+import { defaultUser } from "./settings"
+import {bcryptCompareHashedPassword, jwtSignUser} from "./helpers/formatAndValidation"
 import * as logging from "./logger";
+import 'dotenv/config'
 
 const logger = logging.wichFileToLog("auth");
-
 const router = express.Router();
-const defaults = settings.defaultSettings as any;
-
 router.use(express.urlencoded({ extended: true }));
 
-// TODO need to add SQL for user login
-router.post("/login", function (req, res) {
-  const users = defaults?.settings.user as any[];
-  const { emailOrUsername, password } = req.body;
-  let login = false;
-  users.forEach((user) => {
-    if (user[0] === emailOrUsername) {
-      if (bcrypt.compareSync(password, user[1])) {
-        const token = jwt.sign(
-          { emailOrUsername: emailOrUsername },
-          defaults.settings.secret
-        );
-        login = true;
-        logger.info(`Login success by ${emailOrUsername}`);
-        res.status(200).json({ message: "success", token: token });
-      }
+if (process.env.NODE_ENV == "production" || process.env.NODE_ENV == "staging"){
+  // TODO ADD FOR LOGIN USER
+  console.log("NEED TO ADD FOR LOGIN USER IN PROD OR STAGE")
+} else {
+  router.post("/login", function (req, res) {
+    const { emailOrUsername, password } = req.body;
+    let login = false;
+  
+    if (defaultUser.username === emailOrUsername || defaultUser.email === emailOrUsername) {
+        if (bcryptCompareHashedPassword(password, defaultUser.password)) {
+          login = true;
+          logger.info(`Login success by ${emailOrUsername}`);
+          res.status(200).json({ message: "success", token: jwtSignUser(emailOrUsername) });
+        }
+    }
+    if (!login) {
+      logger.warn(`Login attemp or failed by ${emailOrUsername}`);
+      res.status(401).json({ message: "error" });
     }
   });
-  if (!login) {
-    logger.warn(`Login attemp or failed by ${emailOrUsername}`);
-    res.status(401).json({ message: "error" });
-  }
-});
+}  
+  
+
 
 export { router };

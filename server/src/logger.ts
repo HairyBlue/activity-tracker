@@ -1,7 +1,8 @@
 import * as winston from "winston";
-import DailyRotateFile = require("winston-daily-rotate-file");
+import DailyRotateFile  = require("winston-daily-rotate-file");
 import * as fs from "fs";
 import * as util from "util";
+import 'dotenv/config'
 const { combine, timestamp, json, errors, simple } = winston.format;
 
 const logFolder = "logs";
@@ -20,9 +21,6 @@ const colors = {
 const logger = winston.createLogger({
   level: "info",
   transports: [
-    new winston.transports.Console({
-      format: simple(),
-    }),
     new DailyRotateFile({
       dirname: logFolder,
       filename: "log-%DATE%.log",
@@ -33,6 +31,12 @@ const logger = winston.createLogger({
     }),
   ],
 });
+
+if (process.env.NODE_ENV !== "production") {
+  logger.add(new winston.transports.Console({
+    format: simple(),
+  }),)
+}
 
 function wichFileToLog(filename: string) {
   return {

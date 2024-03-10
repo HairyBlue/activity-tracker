@@ -2,7 +2,11 @@ import {
   validateEmail,
   validatePassword,
   validateDates,
-} from "../../src/helpers/validateFormat";
+  jwtSignUser,
+  jwtVerifyUser,
+  bcryptHashPassword,
+  bcryptCompareHashedPassword
+} from "../../src/helpers/formatAndValidation";
 
 describe("Check email format", function () {
   it("return false when email is empty", function () {
@@ -95,3 +99,38 @@ describe("Check date formats", function () {
     expect(result).toBe("August-September, 2024");
   });
 });
+
+describe("check jwtwebtoken to sign and verify", function () {
+  const emailOrUsername = "sample.com"
+  const token = jwtSignUser(emailOrUsername)
+  it("should decode and verify sampleEmailOrUsername from decode.emailOrUsername", function () {
+    jwtVerifyUser(token).then((decode: any) => {
+      expect(decode.emailOrUsername).toBe(emailOrUsername)
+    }).catch(error => {
+     console.log(error.message)
+   })
+  })
+
+  it("should catch the error if token change", function () {
+    jwtVerifyUser(token + "any").then((decode: any) => {
+      console.log("Hi " +  decode.emailOrUsername)
+    }).catch(error => {
+      expect(error.name).toBe("JsonWebTokenError")
+      expect(error.message).toBe("invalid signature")
+   })
+  })
+})
+
+ describe("check bcrypt to hash and compare password", function () {
+  const samplepasword = "sample123"
+   const hashedPassword = bcryptHashPassword(samplepasword)
+   
+  it("should return true when password match", function () {
+    expect(bcryptCompareHashedPassword(samplepasword, hashedPassword)).toBe(true)
+  })
+
+  it("should return false when password not match", function () {
+    expect(bcryptCompareHashedPassword(samplepasword + "any", hashedPassword)).toBe(false)
+  })
+   
+})
