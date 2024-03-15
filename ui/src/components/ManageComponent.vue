@@ -8,23 +8,24 @@ import ButtonCancel from './globals/buttons/ButtonCancel.vue';
 // deps
 import { userStore } from '../store/userStore';
 import { ref, onMounted, onUnmounted } from 'vue';
+import router from '../router';
 import $ from 'jquery';
 const user = userStore();
 
+const isError = ref<boolean>(false);
+const errorMsg = ref<string>('');
+
 const categoryId = ref<any>(null);
 const categoryName = ref<string>('');
-const isCategoryHasEmpty = ref<boolean>(false);
 
 const clubId = ref<any>(null);
 const clubName = ref<string>('');
 const clubAcronym = ref<string>('');
-const isClubHasEmpty = ref<boolean>(false);
 
 const targetActivityId = ref<any>(null);
 const targetActivityClubId = ref<any>(null);
 const targetActivityYear = ref<string>('');
 const targetActivityNumber = ref<number>(0);
-const istargetActivityHasEmpty = ref<boolean>(false);
 
 const loading = ref<boolean>(false);
 const editActive = ref<boolean>(false);
@@ -50,48 +51,7 @@ function cleanForms() {
   targetActivityNumber.value = 0;
 }
 
-function checkForms() {
-  if (targetCard.value == 'category') {
-    if (categoryName.value == '') {
-      isCategoryHasEmpty.value = true;
-      return false;
-    }
-    isCategoryHasEmpty.value = false;
-  } else if (targetCard.value == 'club') {
-    if (clubName.value == '' || clubAcronym.value == '') {
-      isClubHasEmpty.value = true;
-      return false;
-    }
-    isClubHasEmpty.value = false;
-  } else if (targetCard.value == 'target-activity') {
-    if (targetActivityClubId.value == null || targetActivityYear.value == '') {
-      istargetActivityHasEmpty.value = true;
-      return false;
-    }
-    if (typeof targetActivityNumber.value === 'string') {
-      targetActivityNumber.value = 0;
-    }
-    istargetActivityHasEmpty.value = false;
-  }
-  return true;
-}
-
 // FETCH EVENT ************************************************
-function loadDataByCard(data: any) {
-  let key = data.key;
-  if (key == 'category') {
-    columns.value = ['category name'];
-    rows.value = data.result;
-  } else if (key == 'club') {
-    columns.value = ['club name', 'club acronym'];
-    rows.value = data.result;
-  } else if (key == 'target-activity') {
-    activityFormData.value = data.formData;
-    columns.value = ['club name', 'number of activities', 'year'];
-    rows.value = data.result;
-  }
-}
-
 function fetchData() {
   loading.value = true;
   $.ajax({
@@ -103,8 +63,107 @@ function fetchData() {
     },
   })
     .done((data) => {
-      loadDataByCard(data);
+      let key = data.key;
+      if (key == 'category') {
+        columns.value = ['category name'];
+        rows.value = data.result;
+      } else if (key == 'club') {
+        columns.value = ['club name', 'club acronym'];
+        rows.value = data.result;
+      } else if (key == 'target-activity') {
+        activityFormData.value = data.formData;
+        columns.value = ['club name', 'number of activities', 'year'];
+        rows.value = data.result;
+      }
+
       loading.value = false;
+    })
+    .fail((jqXHR) => {
+      console.log('ERR1: ' + JSON.stringify(jqXHR));
+    });
+}
+
+// SUBMIT EVENT ************************************************
+function submit() {
+  $.ajax({
+    url: `/api/${targetCard.value}`,
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify(
+      (function toSubmitData() {
+        if (targetCard.value == 'category') {
+          return { categoryName: categoryName.value };
+        } else if (targetCard.value == 'club') {
+          return {
+            clubName: clubName.value,
+            clubAcronym: clubAcronym.value,
+          };
+        } else if (targetCard.value == 'target-activity') {
+          return {
+            targetActivityClubId: targetActivityClubId.value,
+            targetActivityNumber: targetActivityNumber.value,
+            targetActivityYear: targetActivityYear.value,
+          };
+        }
+      })()
+    ),
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
+    },
+  })
+    .done((data) => {
+      if (data.message == 'success') {
+        isError.value = false;
+        errorMsg.value = '';
+        fetchData();
+        cleanForms();
+      }
+    })
+    .fail((jqXHR) => {
+      if (jqXHR.status == 400) {
+        isError.value = true;
+        errorMsg.value = jqXHR.responseJSON.message;
+      }
+      if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
+    });
+}
+
+// UPDATE EVENT ************************************************
+function edit(active: boolean) {
+  editActive.value = active;
+  $.ajax({
+    url: `/api/${targetCard.value}`,
+    method: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify(
+      (function toEditData() {
+        if (targetCard.value == 'category') {
+          return { categoryId: categoryId.value, categoryName: categoryName.value };
+        } else if (targetCard.value == 'club') {
+          return {
+            clubId: clubId.value,
+            clubName: clubName.value,
+            clubAcronym: clubAcronym.value,
+          };
+        } else if (targetCard.value == 'target-activity') {
+          return {
+            targetActivityClubId: targetActivityClubId.value,
+            targetActivityNumber: targetActivityNumber.value,
+            targetActivityYear: targetActivityYear.value,
+            targetActivityId: targetActivityId.value,
+          };
+        }
+      })()
+    ),
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
+    },
+  })
+    .done((data) => {
+      if (data.message == 'success') {
+        fetchData();
+        cleanForms();
+      }
     })
     .fail((jqXHR) => {
       console.log('ERR1: ' + JSON.stringify(jqXHR));
@@ -117,89 +176,27 @@ function selectedCard(card: 'category' | 'club' | 'target-activity') {
   columns.value = [];
   rows.value = [];
   editActive.value = false;
-  isCategoryHasEmpty.value = false;
-  isClubHasEmpty.value = false;
-  istargetActivityHasEmpty.value = false;
+  isError.value = false
   cleanForms();
   fetchData();
 }
 
-// SUBMIT EVENT ************************************************
-function toSubmitData() {
-  if (targetCard.value == 'category') {
-    return { categoryName: categoryName.value };
-  } else if (targetCard.value == 'club') {
-    return {
-      clubName: clubName.value,
-      clubAcronym: clubAcronym.value,
-    };
-  } else if (targetCard.value == 'target-activity') {
-    return {
-      targetActivityClubId: targetActivityClubId.value,
-      targetActivityNumber: targetActivityNumber.value,
-      targetActivityYear: targetActivityYear.value,
-    };
-  }
-}
-function submit() {
-  if (checkForms()) {
-    $.ajax({
-      url: `/api/${targetCard.value}`,
-      method: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify(toSubmitData()),
-      beforeSend: function (xhr) {
-        xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
-      },
-    })
-      .done((data) => {
-        if (data.message == 'success') {
-          fetchData();
-        }
-      })
-      .fail((jqXHR) => {
-        console.log('ERR1: ' + JSON.stringify(jqXHR));
-      });
-  }
-  cleanForms();
-}
-
-// UPDATE EVENT ************************************************
-function toEditData() {
-  if (targetCard.value == 'category') {
-    return { categoryId: categoryId.value, categoryName: categoryName.value };
-  } else if (targetCard.value == 'club') {
-    return {
-      clubId: clubId.value,
-      clubName: clubName.value,
-      clubAcronym: clubAcronym.value,
-    };
-  } else if (targetCard.value == 'target-activity') {
-    return {};
-  }
-}
-function edit(active: boolean) {
+function editRowAction(data: any, active: boolean) {
   editActive.value = active;
-  if (checkForms()) {
-    $.ajax({
-      url: `/api/${targetCard.value}`,
-      method: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify(toEditData()),
-      beforeSend: function (xhr) {
-        xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
-      },
-    })
-      .done((data) => {
-        if (data.message == 'success') {
-          fetchData();
-        }
-      })
-      .fail((jqXHR) => {
-        console.log('ERR1: ' + JSON.stringify(jqXHR));
-      });
+  console.log(data);
+  if (targetCard.value == 'category') {
+    categoryId.value = data.categoryId;
+    categoryName.value = data.categoryName;
+  } else if (targetCard.value == 'club') {
+    clubId.value = data.clubId;
+    clubName.value = data.clubName;
+    clubAcronym.value = data.clubAcronym;
+  } else if (targetCard.value == 'target-activity') {
+    targetActivityId.value = data.targetActivityId;
+    targetActivityClubId.value = data.club_id;
+    targetActivityYear.value = data.targetActivityYear;
+    targetActivityNumber.value = data.targetActivityNumber;
   }
-  cleanForms();
 }
 
 function cancel(active: boolean) {
@@ -211,20 +208,6 @@ function cancel(active: boolean) {
   } else if (targetCard.value == 'target-activity') {
   }
   editActive.value = active;
-}
-
-function editRowAction(data: any, active: boolean) {
-  editActive.value = active;
-
-  if (targetCard.value == 'category') {
-    categoryId.value = data.categoryId;
-    categoryName.value = data.categoryName;
-  } else if (targetCard.value == 'club') {
-    clubId.value = data.clubId;
-    clubName.value = data.clubName;
-    clubAcronym.value = data.clubAcronym;
-  } else if (targetCard.value == 'target-activity') {
-  }
 }
 
 // NOTE: WINDOW SIZE LISTENER
@@ -252,45 +235,54 @@ onUnmounted(() => {
           <span class="text-lg">Category</span>
           <div class="mt-2">
             <div class="flex flex-col text-start">
-              <label>Category name</label>
+              <label>Name</label>
               <input type="text" class="h-8" required v-model="categoryName" />
             </div>
+          </div>
+          <div v-if="targetCard == 'category'">
             <div>
-              <ButtonSubmit @click="submit" v-if="!editActive && targetCard == 'category'" class="mt-2 w-1/4 p-2">Add activity</ButtonSubmit>
-              <ButtonSubmit @click="edit(false)" v-if="editActive && targetCard == 'category'" class="mt-2 p-2 sm:w-1/4">Edit activity</ButtonSubmit>
-              <ButtonCancel @click="cancel(false)" v-if="editActive && targetCard == 'category'" class="ml-2 mt-2 p-2 sm:w-1/4">Cancel</ButtonCancel>
+              <ButtonSubmit @click="submit" v-if="!editActive" class="mt-2 w-1/4 p-2">Add activity</ButtonSubmit>
+              <ButtonSubmit @click="edit(false)" v-if="editActive" class="mt-2 p-2 sm:w-1/4">Edit activity</ButtonSubmit>
+              <ButtonCancel @click="cancel(false)" v-if="editActive" class="ml-2 mt-2 p-2 sm:w-1/4">Cancel</ButtonCancel>
+            </div>
+            <div v-if="isError" class="mt-4 text-center text-red-400">
+              <span>{{ errorMsg }}</span>
             </div>
           </div>
-          <div v-if="isCategoryHasEmpty" class="mt-4 text-center text-red-400"><span>Please complete the form</span></div>
         </section>
         <!--  -->
         <!--  -->
         <section @click.self="selectedCard('club')" class="card mt-2 w-full p-4" :class="targetCard == 'club' ? 'border-2 border-red-400' : ''">
-          <span class="text-lg">Clubs</span>
+          <span class="text-lg">Clubs / Organization</span>
           <div class="mt-2 flex flex-col text-start">
-            <label>Clubs name</label>
+            <label>Name</label>
             <input type="text" class="h-8" required v-model="clubName" />
           </div>
           <div class="mt-2 flex flex-col text-start">
-            <label>Clubs acronym</label>
+            <label>Acronym</label>
             <input type="text" class="h-8" required v-model="clubAcronym" />
           </div>
-          <div>
-            <ButtonSubmit @click="submit" v-if="!editActive && targetCard == 'club'" class="mt-2 w-1/4 p-2">Add activity</ButtonSubmit>
-            <ButtonSubmit @click="edit(false)" v-if="editActive && targetCard == 'club'" class="mt-2 p-2 sm:w-1/4">Edit activity</ButtonSubmit>
-            <ButtonCancel @click="cancel(false)" v-if="editActive && targetCard == 'club'" class="ml-2 mt-2 p-2 sm:w-1/4">Cancel</ButtonCancel>
+
+          <div v-if="targetCard == 'club'">
+            <div>
+              <ButtonSubmit @click="submit" v-if="!editActive" class="mt-2 w-1/4 p-2">Add activity</ButtonSubmit>
+              <ButtonSubmit @click="edit(false)" v-if="editActive" class="mt-2 p-2 sm:w-1/4">Edit activity</ButtonSubmit>
+              <ButtonCancel @click="cancel(false)" v-if="editActive" class="ml-2 mt-2 p-2 sm:w-1/4">Cancel</ButtonCancel>
+            </div>
+            <div v-if="isError" class="mt-4 text-center text-red-400">
+              <span>{{ errorMsg }}</span>
+            </div>
           </div>
-          <div v-if="isClubHasEmpty" class="mt-4 text-center text-red-400"><span>Please complete the form</span></div>
         </section>
         <!--  -->
         <!--  -->
         <section @click.self="selectedCard('target-activity')" class="card mt-2 w-full p-4" :class="targetCard == 'target-activity' ? 'border-2 border-red-400' : ''">
           <span class="text-lg">Target Activity</span>
           <div class="mt-2 flex flex-col text-start">
-            <label>Select a clubs</label>
+            <label>Select a clubs/organization</label>
             <select class="h-8" required v-model="targetActivityClubId">
               <option :value="null" selected disabled>clubs</option>
-              <option v-for="club in activityFormData.clubs" :value="club.clubId">{{ club.clubAcronym }} ({{ club.clubName }})</option>
+              <option v-for="club in activityFormData.clubs" :value="club.clubId">{{ club.clubName }} ({{ club.clubAcronym }})</option>
             </select>
           </div>
           <div class="flex gap-2">
@@ -307,19 +299,23 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <div>
-            <ButtonSubmit @click="submit" v-if="!editActive && targetCard == 'target-activity'" class="mt-2 w-1/4 p-2">Add activity</ButtonSubmit>
-            <ButtonSubmit @click="edit(false)" v-if="editActive && targetCard == 'target-activity'" class="mt-2 p-2 sm:w-1/4">Edit activity</ButtonSubmit>
-            <ButtonCancel @click="cancel(false)" v-if="editActive && targetCard == 'target-activity'" class="ml-2 mt-2 p-2 sm:w-1/4">Cancel</ButtonCancel>
+          <div v-if="targetCard == 'target-activity'">
+            <div>
+              <ButtonSubmit @click="submit" v-if="!editActive" class="mt-2 w-1/4 p-2">Add activity</ButtonSubmit>
+              <ButtonSubmit @click="edit(false)" v-if="editActive" class="mt-2 p-2 sm:w-1/4">Edit activity</ButtonSubmit>
+              <ButtonCancel @click="cancel(false)" v-if="editActive" class="ml-2 mt-2 p-2 sm:w-1/4">Cancel</ButtonCancel>
+            </div>
+            <div v-if="isError" class="mt-4 text-center text-red-400">
+              <span>{{ errorMsg }}</span>
+            </div>
           </div>
-          <div v-if="istargetActivityHasEmpty" class="mt-4 text-center text-red-400"><span>Please complete the form</span></div>
         </section>
         <!--  -->
         <!--  -->
       </div>
       <div class="card w-1/2">
         <div v-if="loading" class="flex h-full items-center justify-center text-2xl"><span>loading...</span></div>
-        <div v-else class="max-h-[400px] overflow-y-auto p-4">
+        <div v-else class="max-h-[520px] overflow-y-auto p-4">
           <span>{{ targetCard.toUpperCase() }}</span>
           <table class="w-full table-auto">
             <thead class="border-b">
@@ -351,9 +347,16 @@ onUnmounted(() => {
               </tr>
               <!--  -->
               <!--  -->
-              <!-- <tr v-if="targetCard == 'target-activity'" v-for="(row, idx) in rows" :class="idx % 2 == 1 ? 'grayed-out' : ''">
-                <td></td>
-              </tr> -->
+              <tr v-if="targetCard == 'target-activity'" v-for="(row, idx) in rows" :class="idx % 2 == 1 ? 'grayed-out' : ''">
+                <td>{{ row.clubAcronym }}</td>
+                <td>{{ row.targetActivityNumber }}</td>
+                <td>{{ row.targetActivityYear }}</td>
+
+                <td :class="windowSize <= 768 ? '' : 'flex'">
+                  <div @click="editRowAction(row, true)"><img :src="editImg" alt="" /></div>
+                  <div><img :src="deleteImg" alt="" /></div>
+                </td>
+              </tr>
               <!--  -->
               <!--  -->
             </tbody>

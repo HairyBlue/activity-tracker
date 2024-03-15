@@ -1,33 +1,36 @@
 <script setup lang="ts">
-// dummy
-import activity_data from '../data/activity-sample';
-import clubsSample from '../data/clubs-sample';
-import categoriesSample from '../data/categories-sample';
 // component
 import deleteImg from '../assets/svg/delete.svg';
 import editImg from '../assets/svg/edit.svg';
 import noteImg from '../assets/svg/notes.svg';
 import ButtonSubmit from './globals/buttons/ButtonSubmit.vue';
 import ButtonCancel from './globals/buttons/ButtonCancel.vue';
+
+// deps
 import { userStore } from '../store/userStore';
 import router from '../router';
-// dependencies
 import $ from 'jquery';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 const user = userStore();
 const notesPopUp = ref<boolean>(false);
 const editActive = ref<boolean>(false);
+const isError = ref<boolean>(false);
+const errorMsg = ref<string>('');
 
-// const activityId = ref<any>(null)
-const clubId = ref<any>(null);
-const categoryId = ref<any>(null);
 const notesData = ref<any>({});
+// const activityId = ref<any>(null)
+const club_id = ref<any>(null);
+const category_id = ref<any>(null);
 const activityName = ref<string>('');
-const activityNote = ref<string>('');
+const activityNotes = ref<string>('');
 const activityStartDateIso = ref<string>('');
 const activityEndDateIso = ref<string>('');
 
+const clubs = ref<Array<any>>([]);
+const categories = ref<Array<any>>([]);
+
+const rows = ref<Array<any>>([]);
 const windowSize = ref();
 
 // NOTE: DATA MANIPULATION
@@ -38,91 +41,104 @@ function notesPopUpAction(data: any, active: boolean) {
 function editRowAction(data: any, active: boolean) {
   editActive.value = active;
 
-  clubId.value = data.clubId;
-  categoryId.value = data.categoryId;
+  club_id.value = data.club_id;
+  category_id.value = data.category_id;
   activityName.value = data.activityName;
-  activityNote.value = data.activityNote;
+  activityNotes.value = data.activityNotes;
   activityStartDateIso.value = data.activityStartDateIso;
   activityEndDateIso.value = data.activityEndDateIso;
 }
 
 function cleanForm() {
-  clubId.value = null;
-  categoryId.value = null;
+  club_id.value = null;
+  category_id.value = null;
   activityName.value = '';
-  activityNote.value = '';
+  activityNotes.value = '';
   activityStartDateIso.value = '';
   activityEndDateIso.value = '';
 }
-function checkNotEmpty() {
-  return (
-    clubId.value !== null &&
-    categoryId.value !== null &&
-    activityName.value !== '' &&
-    activityNote.value !== '' &&
-    activityStartDateIso.value !== '' &&
-    activityEndDateIso.value !== ''
-  );
+
+function fetchData() {
+  $.ajax({
+    url: '/api/activity',
+    method: 'GET',
+    contentType: 'application/json',
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
+    },
+  }).then((data) => {
+    console.log(data);
+    clubs.value = data.formdata.club;
+    categories.value = data.formdata.category;
+    rows.value = data.result;
+  });
 }
-function toSubmitData() {
-  return {
-    clubId: clubId.value,
-    categoryId: categoryId.value,
-    activityName: activityName.value,
-    activityNote: activityNote.value,
-    activityStartDateIso: activityStartDateIso.value,
-    activityEndDateIso: activityEndDateIso.value,
-  };
-}
+
 function submit() {
-  if (checkNotEmpty()) {
-    $.ajax({
-      url: '/api/activity',
-      method: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify(toSubmitData()),
-      beforeSend: function (xhr) {
-        xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
-      },
+  $.ajax({
+    url: '/api/activity',
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      club_id: club_id.value,
+      category_id: category_id.value,
+      activityName: activityName.value,
+      activityNotes: activityNotes.value,
+      activityStartDateIso: activityStartDateIso.value,
+      activityEndDateIso: activityEndDateIso.value,
+    }),
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
+    },
+  })
+    .done((data) => {
+      if (data.message == 'success') {
+        isError.value = false;
+        cleanForm();
+        console.log('success');
+      }
     })
-      .done((data) => {
-        if (data.message == 'success') {
-          console.log('success');
-        }
-      })
-      .fail((jqXHR) => {
-        if (jqXHR.status == 400) console.log('error');
-        if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
-      });
-    cleanForm();
-  }
+    .fail((jqXHR) => {
+      if (jqXHR.status == 400) {
+        isError.value = true;
+        errorMsg.value = jqXHR.responseJSON.message;
+      }
+      if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
+    });
 }
 
 function edit(active: boolean) {
-  if (checkNotEmpty()) {
-    editActive.value = active;
-    $.ajax({
-      url: '/api/activity',
-      method: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify(toSubmitData()),
-      beforeSend: function (xhr) {
-        xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
-      },
+  editActive.value = active;
+  $.ajax({
+    url: '/api/activity',
+    method: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      club_id: club_id.value,
+      category_id: category_id.value,
+      activityName: activityName.value,
+      activityNotes: activityNotes.value,
+      activityStartDateIso: activityStartDateIso.value,
+      activityEndDateIso: activityEndDateIso.value,
+    }),
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
+    },
+  })
+    .done((data) => {
+      if (data.message == 'success') {
+        isError.value = false;
+        cleanForm();
+        console.log('success');
+      }
     })
-      .done((data) => {
-        if (data.message == 'success') {
-          console.log('success');
-        }
-      })
-      .fail((jqXHR) => {
-        if (jqXHR.status == 400) {
-          console.log('error');
-        }
-        if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
-      });
-    cleanForm();
-  }
+    .fail((jqXHR) => {
+      if (jqXHR.status == 400) {
+        isError.value = true;
+        errorMsg.value = jqXHR.responseJSON.message;
+      }
+      if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
+    });
 }
 
 function cancel(active: boolean) {
@@ -135,6 +151,7 @@ function checkWindowSize() {
   windowSize.value = window.innerWidth;
 }
 onMounted(() => {
+  fetchData();
   window.addEventListener('resize', checkWindowSize);
 });
 onUnmounted(() => {
@@ -155,22 +172,22 @@ onUnmounted(() => {
           </section>
           <section class="mt-4 flex h-full flex-col text-start">
             <label>Notes <span class="text-red-500">*</span></label>
-            <textarea cols="30" rows="10" v-model="activityNote" required></textarea>
+            <textarea cols="30" rows="10" v-model="activityNotes" required></textarea>
           </section>
         </div>
         <div class="flex flex-col md:w-1/2">
           <section class="flex flex-col text-start">
             <label>Clubs <span class="text-red-500">*</span></label>
-            <select class="h-8" v-model="clubId" required>
+            <select class="h-8" v-model="club_id" required>
               <option value="" selected disabled>Select clubs</option>
-              <option v-for="(club, idx) in clubsSample" :value="idx">{{ club }}</option>
+              <option v-for="club in clubs" :value="club.clubId">{{ club.clubName }} ({{ club.clubAcronym }})</option>
             </select>
           </section>
           <section class="mt-4 flex flex-col text-start">
             <label>Category <span class="text-red-500">*</span></label>
-            <select class="h-8" v-model="categoryId" required>
+            <select class="h-8" v-model="category_id" required>
               <option value="" selected disabled>Select category</option>
-              <option v-for="(category, idx) in categoriesSample" :value="idx">{{ category }}</option>
+              <option v-for="category in categories" :value="category.categoryId">{{ category.categoryName }}</option>
             </select>
           </section>
 
@@ -189,6 +206,9 @@ onUnmounted(() => {
         <ButtonSubmit @click="submit" v-if="!editActive" class="mt-8 w-1/4 p-2">Add activity</ButtonSubmit>
         <ButtonSubmit @click="edit(false)" v-if="editActive" class="mt-8 p-2 sm:w-1/4">Edit activity</ButtonSubmit>
         <ButtonCancel @click="cancel(false)" v-if="editActive" class="ml-2 mt-2 p-2 sm:w-1/4">Cancel</ButtonCancel>
+      </div>
+      <div v-if="isError" class="text-center text-lg text-red-400">
+        <span>{{ errorMsg }}</span>
       </div>
     </div>
     <!--  -->
@@ -214,14 +234,14 @@ onUnmounted(() => {
           </tr>
         </thead>
         <tbody class="text-[10px]">
-          <tr v-for="(data, idx) in activity_data" :key="idx" class="text-center" :class="idx % 2 == 1 ? 'grayed-out' : ''">
-            <td>{{ data.clubName }}</td>
-            <td>{{ data.activityName }}</td>
-            <td>{{ data.categoryName }}</td>
-            <td>{{ data.activityDateDisplay }}</td>
+          <tr v-for="(row, idx) in rows" :key="idx" class="text-center" :class="idx % 2 == 1 ? 'grayed-out' : ''">
+            <td>{{ row.clubName }}</td>
+            <td>{{ row.activityName }}</td>
+            <td>{{ row.categoryName }}</td>
+            <td>{{ row.activityDateDisplay }}</td>
             <td :class="windowSize <= 768 ? '' : 'flex'">
-              <div @click="notesPopUpAction(data, true)"><img :src="noteImg" alt="" /></div>
-              <div @click="editRowAction(data, true)"><img :src="editImg" alt="" /></div>
+              <div @click="notesPopUpAction(rows, true)"><img :src="noteImg" alt="" /></div>
+              <div @click="editRowAction(rows, true)"><img :src="editImg" alt="" /></div>
               <div><img :src="deleteImg" alt="" /></div>
             </td>
           </tr>
