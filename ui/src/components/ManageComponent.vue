@@ -68,11 +68,11 @@ function fetchData() {
         columns.value = ['category name'];
         rows.value = data.result;
       } else if (key == 'club') {
-        columns.value = ['club name', 'club acronym'];
+        columns.value = ['name', 'acronym'];
         rows.value = data.result;
       } else if (key == 'target-activity') {
         activityFormData.value = data.formData;
-        columns.value = ['club name', 'number of activities', 'year'];
+        columns.value = ['name', 'target', 'year'];
         rows.value = data.result;
       }
 
@@ -160,6 +160,7 @@ function edit(active: boolean) {
     },
   })
     .done((data) => {
+      console.log(data)
       if (data.message == 'success') {
         fetchData();
         cleanForms();
@@ -176,7 +177,7 @@ function selectedCard(card: 'category' | 'club' | 'target-activity') {
   columns.value = [];
   rows.value = [];
   editActive.value = false;
-  isError.value = false
+  isError.value = false;
   cleanForms();
   fetchData();
 }
@@ -348,7 +349,7 @@ onUnmounted(() => {
               <!--  -->
               <!--  -->
               <tr v-if="targetCard == 'target-activity'" v-for="(row, idx) in rows" :class="idx % 2 == 1 ? 'grayed-out' : ''">
-                <td>{{ row.clubAcronym }}</td>
+                <td>{{ row.clubName }} ({{ row.clubAcronym }})</td>
                 <td>{{ row.targetActivityNumber }}</td>
                 <td>{{ row.targetActivityYear }}</td>
 
@@ -385,7 +386,7 @@ table {
 
 td,
 th {
-  padding: 4px;
+  padding: 2px;
 }
 img {
   min-width: 12px;

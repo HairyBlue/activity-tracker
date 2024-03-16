@@ -36,7 +36,7 @@ describe("check default setting yaml where defined", function () {
     it("should have config", function () {
       expect(developmentDB.host).toBe("localhost" || "127.0.0.1");
       expect(developmentDB.user).toBe("root");
-      expect(developmentDB.pasword).toBe("Hairyblue");
+      expect(developmentDB.password).toBe("Hairyblue");
       expect(developmentDB.name).toBe("activity_tracker");
       expect(developmentDB.limit).toBeGreaterThan(15);
     })
@@ -49,7 +49,7 @@ describe("check default setting yaml where defined", function () {
    it("should have config", function () {
      expect(stagingDB.host).toBe("localhost" || "127.0.0.1");
      expect(stagingDB.user).toBe("root");
-     expect(stagingDB.pasword).toBe("root");
+     expect(stagingDB.password).toBe("root");
      expect(stagingDB.name).toBe("activity_tracker");
      expect(stagingDB.limit).toBeGreaterThan(15);
    })

@@ -21,7 +21,7 @@ const defaultUser = {
 const developmentDB = {
   host: defaults.db.development.host,
   user: defaults.db.development.user,
-  pasword: defaults.db.development.password,
+  password: defaults.db.development.password,
   name: defaults.db.development.name,
   limit: defaults.db.development.connectionLimit
 }
@@ -29,7 +29,7 @@ const developmentDB = {
 const stagingDB = {
   host: defaults.db.staging.host,
   user: defaults.db.staging.user,
-  pasword: defaults.db.staging.password,
+  password: defaults.db.staging.password,
   name: defaults.db.staging.name,
   limit: defaults.db.staging.connectionLimit
 }

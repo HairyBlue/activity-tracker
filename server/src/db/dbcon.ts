@@ -20,13 +20,13 @@ if (process.env.NODE_ENV == "production") {
 } else if (process.env.NODE_ENV == "staging") {
   config.host = stagingDB.host;
   config.user = stagingDB.user;
-  config.password = stagingDB.pasword;
+  config.password = stagingDB.password;
   config.name = stagingDB.name;
   config.limit = stagingDB.limit;
 } else {
   config.host = developmentDB.host;
   config.user = developmentDB.user;
-  config.password = developmentDB.pasword;
+  config.password = developmentDB.password;
   config.name = developmentDB.name;
   config.limit = developmentDB.limit;
 }

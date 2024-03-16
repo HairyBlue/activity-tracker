@@ -10,8 +10,9 @@ import ButtonCancel from './globals/buttons/ButtonCancel.vue';
 import { userStore } from '../store/userStore';
 import router from '../router';
 import $ from 'jquery';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 
+// YAY BUNCH OF REFs, need to clean up soon
 const user = userStore();
 const notesPopUp = ref<boolean>(false);
 const editActive = ref<boolean>(false);
@@ -19,7 +20,7 @@ const isError = ref<boolean>(false);
 const errorMsg = ref<string>('');
 
 const notesData = ref<any>({});
-// const activityId = ref<any>(null)
+const activityId = ref<any>(null);
 const club_id = ref<any>(null);
 const category_id = ref<any>(null);
 const activityName = ref<string>('');
@@ -29,10 +30,21 @@ const activityEndDateIso = ref<string>('');
 
 const clubs = ref<Array<any>>([]);
 const categories = ref<Array<any>>([]);
-
 const rows = ref<Array<any>>([]);
-const windowSize = ref();
+const recordSize = ref<number>(0);
+const yearObj = ref<Array<string>>([]);
 
+// NOTE: THIS IS FOR HANDLING QUERY PARAMETERS
+const searchFilter = ref<string>('');
+const clubFilter = ref<any>('');
+const categoryFilter = ref<any>('');
+const year = ref(new Date().getFullYear().toString());
+const orderBy = ref<any>('');
+
+const pageSize = ref<number>(20);
+const pageNumber = ref<number>(1);
+
+const windowSize = ref();
 // NOTE: DATA MANIPULATION
 function notesPopUpAction(data: any, active: boolean) {
   notesPopUp.value = active;
@@ -41,6 +53,7 @@ function notesPopUpAction(data: any, active: boolean) {
 function editRowAction(data: any, active: boolean) {
   editActive.value = active;
 
+  activityId.value = data.activityId;
   club_id.value = data.club_id;
   category_id.value = data.category_id;
   activityName.value = data.activityName;
@@ -63,14 +76,25 @@ function fetchData() {
     url: '/api/activity',
     method: 'GET',
     contentType: 'application/json',
+    data: {
+      pageSize: pageSize.value,
+      pageNumber: pageNumber.value,
+      searchFilter: searchFilter.value,
+      clubFilter: clubFilter.value,
+      categoryFilter: categoryFilter.value,
+      year: year.value,
+      orderBy: orderBy.value,
+    },
     beforeSend: function (xhr) {
       xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
     },
   }).then((data) => {
     console.log(data);
+    recordSize.value = data.count[0].count;
     clubs.value = data.formdata.club;
     categories.value = data.formdata.category;
     rows.value = data.result;
+    yearObj.value = data.year;
   });
 }
 
@@ -95,7 +119,7 @@ function submit() {
       if (data.message == 'success') {
         isError.value = false;
         cleanForm();
-        console.log('success');
+        fetchData();
       }
     })
     .fail((jqXHR) => {
@@ -107,13 +131,13 @@ function submit() {
     });
 }
 
-function edit(active: boolean) {
-  editActive.value = active;
+function edit() {
   $.ajax({
     url: '/api/activity',
     method: 'PUT',
     contentType: 'application/json',
     data: JSON.stringify({
+      activityId: activityId.value,
       club_id: club_id.value,
       category_id: category_id.value,
       activityName: activityName.value,
@@ -128,8 +152,9 @@ function edit(active: boolean) {
     .done((data) => {
       if (data.message == 'success') {
         isError.value = false;
+        editActive.value = false;
         cleanForm();
-        console.log('success');
+        fetchData();
       }
     })
     .fail((jqXHR) => {
@@ -141,8 +166,8 @@ function edit(active: boolean) {
     });
 }
 
-function cancel(active: boolean) {
-  editActive.value = active;
+function cancel() {
+  editActive.value = false;
   cleanForm();
 }
 
@@ -150,13 +175,59 @@ function cancel(active: boolean) {
 function checkWindowSize() {
   windowSize.value = window.innerWidth;
 }
+
+function clickPageNum(prevNext: 'prev' | 'next') {
+  const maxPage = Math.ceil(recordSize.value / pageSize.value);
+
+  if (prevNext == 'prev') {
+    if (pageNumber.value == 1) return;
+    pageNumber.value -= 1;
+    fetchData();
+  }
+  if (prevNext == 'next') {
+    if (pageNumber.value == maxPage) return;
+    pageNumber.value += 1;
+    fetchData();
+  }
+}
+
+function resetFilter() {
+  searchFilter.value = '';
+  clubFilter.value = '';
+  categoryFilter.value = '';
+  orderBy.value = '';
+  year.value = new Date().getFullYear().toString();
+  fetchData();
+}
+
+// TODO: CLEAN UP WATCH
+watch(
+  [pageSize, searchFilter, clubFilter, categoryFilter, year, orderBy],
+  (
+    [newPageSize, newSearchFilter, newClubFilter, newCategoryFilter, newYear, newOrderBy],
+    [oldPageSize, oldSearchFilter, oldClubFilter, oldCategoryFilter, oldYear, oldOrderBy]
+  ) => {
+    if (newPageSize !== oldPageSize) {
+      pageNumber.value = 1;
+      fetchData();
+    }
+    if (newSearchFilter !== oldSearchFilter) fetchData();
+    if (newClubFilter !== oldClubFilter) fetchData();
+    if (newCategoryFilter !== oldCategoryFilter) fetchData();
+    if (newYear !== oldYear) fetchData();
+    if (newOrderBy !== oldOrderBy) fetchData();
+  }
+);
+
 onMounted(() => {
   fetchData();
   window.addEventListener('resize', checkWindowSize);
 });
+
 onUnmounted(() => {
   window.removeEventListener('resize', checkWindowSize);
 });
+
 </script>
 <template>
   <div id="activity-container" class="sm:p-6">
@@ -171,7 +242,7 @@ onUnmounted(() => {
             <input type="text" class="h-8" v-model="activityName" required />
           </section>
           <section class="mt-4 flex h-full flex-col text-start">
-            <label>Notes <span class="text-red-500">*</span></label>
+            <label>Notes <span class="text-gray-400">( optional )</span></label>
             <textarea cols="30" rows="10" v-model="activityNotes" required></textarea>
           </section>
         </div>
@@ -203,9 +274,9 @@ onUnmounted(() => {
       </div>
 
       <div>
-        <ButtonSubmit @click="submit" v-if="!editActive" class="mt-8 w-1/4 p-2">Add activity</ButtonSubmit>
-        <ButtonSubmit @click="edit(false)" v-if="editActive" class="mt-8 p-2 sm:w-1/4">Edit activity</ButtonSubmit>
-        <ButtonCancel @click="cancel(false)" v-if="editActive" class="ml-2 mt-2 p-2 sm:w-1/4">Cancel</ButtonCancel>
+        <ButtonSubmit @click="submit" v-if="!editActive" class="mt-8 p-2 max-lg:w-1/2 lg:w-1/4">Add activity</ButtonSubmit>
+        <ButtonSubmit @click="edit" v-if="editActive" class="mr-1 mt-8 p-2 max-lg:w-1/2 lg:w-1/4">Edit activity</ButtonSubmit>
+        <ButtonCancel @click="cancel" v-if="editActive" class="mt-2 p-2 max-lg:w-1/2 lg:w-1/4">Cancel</ButtonCancel>
       </div>
       <div v-if="isError" class="text-center text-lg text-red-400">
         <span>{{ errorMsg }}</span>
@@ -216,11 +287,37 @@ onUnmounted(() => {
     <!--  -->
     <!--  -->
     <div class="card mt-4 max-h-[400px] overflow-y-auto">
-      <div>
-        <section class="flex">
-          <label>Search: </label>
-          <input type="text" class="h-8" />
-          <ButtonSubmit class="w-1/4 p-2">Add activity</ButtonSubmit>
+      <div class="flex w-full items-center justify-between p-2 max-lg:flex-col max-lg:gap-2">
+        <section class="flex w-full gap-1 lg:w-1/3">
+          <input type="text" class="w-full" v-model="searchFilter" />
+          <!-- <ButtonSubmit class="px-4 py-1 text-xs sm:min-w-[150px]">Search Activity</ButtonSubmit> -->
+        </section>
+        <section class="ml-1 flex gap-2 max-md:flex-col">
+          <div>
+            <select class="w-full py-1 md:w-[150px]" v-model="clubFilter">
+              <option value="" selected disabled>Club and Oraginzation</option>
+              <option v-for="club in clubs" :value="club.clubId">{{ club.clubName }} - {{ club.clubAcronym }}</option>
+            </select>
+          </div>
+          <div>
+            <select class="w-full py-1 md:w-[150px]" v-model="categoryFilter">
+              <option value="" selected disabled>Category</option>
+              <option v-for="category in categories" :value="category.categoryId">{{ category.categoryName }}</option>
+            </select>
+          </div>
+          <div>
+            <select class="w-full py-1 md:w-[150px]" v-model="year">
+              <option v-for="years in yearObj" :value="years">{{ years }}</option>
+            </select>
+          </div>
+          <div>
+            <select class="w-full py-1 md:w-[150px]" v-model="orderBy">
+              <option disabled selected value="">Order by year</option>
+              <option value="DESC">DESCENDING</option>
+              <option value="ASC">ASCENDING</option>
+            </select>
+          </div>
+          <ButtonSubmit class="px-8 py-1" @click="resetFilter">Reset</ButtonSubmit>
         </section>
       </div>
       <table class="w-full table-auto">
@@ -238,15 +335,25 @@ onUnmounted(() => {
             <td>{{ row.clubName }}</td>
             <td>{{ row.activityName }}</td>
             <td>{{ row.categoryName }}</td>
-            <td>{{ row.activityDateDisplay }}</td>
+            <td>{{ row.activityDisplayDate }}</td>
             <td :class="windowSize <= 768 ? '' : 'flex'">
-              <div @click="notesPopUpAction(rows, true)"><img :src="noteImg" alt="" /></div>
-              <div @click="editRowAction(rows, true)"><img :src="editImg" alt="" /></div>
+              <div @click="notesPopUpAction(row, true)"><img :src="noteImg" alt="" /></div>
+              <div @click="editRowAction(row, true)"><img :src="editImg" alt="" /></div>
               <div><img :src="deleteImg" alt="" /></div>
             </td>
           </tr>
         </tbody>
       </table>
+      <div class="mb-2 mt-8 flex items-center justify-center gap-2">
+        <span class="select-none" @click="clickPageNum('prev')">Prev</span>
+        <div class="card border px-8 py-1">{{ pageNumber }}</div>
+        <span class="select-none" @click="clickPageNum('next')">Next</span>
+        <select v-model="pageSize">
+          <option :value="20">20</option>
+          <option :value="50">50</option>
+          <option :value="100">100</option>
+        </select>
+      </div>
     </div>
     <!--  -->
     <!--  -->
@@ -254,14 +361,14 @@ onUnmounted(() => {
     <!--  -->
     <div v-if="notesPopUp" class="note">
       <div class="card card-note flex flex-col items-center justify-between p-4">
-        <div>
-          <span class="font-black">
-            {{ notesData.clubName }} |
+        <div class="text-center">
+          <span class="text-xs font-black">
+            {{ notesData.clubName }}
             {{ notesData.activityName }}
           </span>
-          <p class="mt-6">{{ notesData.activityNote }}</p>
+          <p class="mt-6">{{ notesData.activityNotes }}</p>
         </div>
-        <ButtonSubmit @click="notesPopUpAction({}, false)" class="w-1/2">Close</ButtonSubmit>
+        <ButtonSubmit @click="notesPopUpAction({}, false)" class="w-1/2 p-2">Close</ButtonSubmit>
       </div>
     </div>
   </div>

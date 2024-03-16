@@ -26,3 +26,5 @@ dist-ssr
 **/*.sql
 **/cache
 **/coverage
+
+.env
