@@ -9,7 +9,8 @@
     "test": "jest",
     "migrate:db": "npx ts-node ./src/utils/migration/db.ts 1",
     "migrate:reset": "npx ts-node ./src/utils/migration/db.ts 2",
-    "migrate:seed": "npx ts-node ./src/utils/migration/db.ts 3"
+    "migrate:seed": "npx ts-node ./src/utils/migration/db.ts 3",
+    "migrate:seed-dummy": "npx ts-node ./src/utils/migration/db.ts 4"
   },
   "keywords": [],
   "author": "",

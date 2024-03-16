@@ -227,7 +227,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', checkWindowSize);
 });
-
 </script>
 <template>
   <div id="activity-container" class="sm:p-6">
@@ -286,7 +285,7 @@ onUnmounted(() => {
     <!--  -->
     <!--  -->
     <!--  -->
-    <div class="card mt-4 max-h-[400px] overflow-y-auto">
+    <div class="card mt-4 max-h-screen overflow-y-auto">
       <div class="flex w-full items-center justify-between p-2 max-lg:flex-col max-lg:gap-2">
         <section class="flex w-full gap-1 lg:w-1/3">
           <input type="text" class="w-full" v-model="searchFilter" />
