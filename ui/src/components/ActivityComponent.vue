@@ -5,7 +5,7 @@ import editImg from '../assets/svg/edit.svg';
 import noteImg from '../assets/svg/notes.svg';
 import ButtonSubmit from './globals/buttons/ButtonSubmit.vue';
 import ButtonCancel from './globals/buttons/ButtonCancel.vue';
-
+import ButtonWarn from './globals/buttons/ButtonWarn.vue';
 // deps
 import { userStore } from '../store/userStore';
 import router from '../router';
@@ -15,11 +15,13 @@ import { onMounted, onUnmounted, ref, watch } from 'vue';
 // YAY BUNCH OF REFs, need to clean up soon
 const user = userStore();
 const notesPopUp = ref<boolean>(false);
+const deletePopUp = ref<boolean>(false);
 const editActive = ref<boolean>(false);
 const isError = ref<boolean>(false);
 const errorMsg = ref<string>('');
 
-const notesData = ref<any>({});
+const popUpData = ref<any>({});
+
 const activityId = ref<any>(null);
 const club_id = ref<any>(null);
 const category_id = ref<any>(null);
@@ -48,9 +50,27 @@ const windowSize = ref();
 // NOTE: DATA MANIPULATION
 function notesPopUpAction(data: any, active: boolean) {
   notesPopUp.value = active;
-  notesData.value = data;
+  popUpData.value = data;
 }
+
+function deletePopUpAction(data: any, active: boolean) {
+  deletePopUp.value = active;
+  popUpData.value = data;
+}
+
 function editRowAction(data: any, active: boolean) {
+  editActive.value = active;
+
+  activityId.value = data.activityId;
+  club_id.value = data.club_id;
+  category_id.value = data.category_id;
+  activityName.value = data.activityName;
+  activityNotes.value = data.activityNotes;
+  activityStartDateIso.value = data.activityStartDateIso;
+  activityEndDateIso.value = data.activityEndDateIso;
+}
+
+function deleteRowAction(data: any, active: boolean) {
   editActive.value = active;
 
   activityId.value = data.activityId;
@@ -153,6 +173,31 @@ function edit() {
       if (data.message == 'success') {
         isError.value = false;
         editActive.value = false;
+        cleanForm();
+        fetchData();
+      }
+    })
+    .fail((jqXHR) => {
+      if (jqXHR.status == 400) {
+        isError.value = true;
+        errorMsg.value = jqXHR.responseJSON.message;
+      }
+      if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
+    });
+}
+
+function destroy(activityId: any) {
+  $.ajax({
+    url: `/api/activity/${activityId}`,
+    method: 'DELETE',
+    contentType: 'application/json',
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
+    },
+  })
+    .done((data) => {
+      if (data.message == 'success') {
+        deletePopUp.value = false;
         cleanForm();
         fetchData();
       }
@@ -329,7 +374,7 @@ onUnmounted(() => {
             <th></th>
           </tr>
         </thead>
-        <tbody class="text-[10px]">
+        <tbody class="max-sm:text-[10px] md:text-[12px]">
           <tr v-for="(row, idx) in rows" :key="idx" class="text-center" :class="idx % 2 == 1 ? 'grayed-out' : ''">
             <td>{{ row.clubName }}</td>
             <td>{{ row.activityName }}</td>
@@ -338,7 +383,7 @@ onUnmounted(() => {
             <td :class="windowSize <= 768 ? '' : 'flex'">
               <div @click="notesPopUpAction(row, true)"><img :src="noteImg" alt="" /></div>
               <div @click="editRowAction(row, true)"><img :src="editImg" alt="" /></div>
-              <div><img :src="deleteImg" alt="" /></div>
+              <div @click="deletePopUpAction(row, true)"><img :src="deleteImg" alt="" /></div>
             </td>
           </tr>
         </tbody>
@@ -361,13 +406,40 @@ onUnmounted(() => {
     <div v-if="notesPopUp" class="note">
       <div class="card card-note flex flex-col items-center justify-between p-4">
         <div class="text-center">
-          <span class="text-xs font-black">
-            {{ notesData.clubName }}
-            {{ notesData.activityName }}
-          </span>
-          <p class="mt-6">{{ notesData.activityNotes }}</p>
+          <p class="text-xs font-black">
+            {{ popUpData.clubName }}
+          </p>
+          <p class="mb-2 text-xs font-black">
+            {{ popUpData.activityName }}
+          </p>
+          <p class="mb-2 text-xs font-medium">{{ popUpData.activityDisplayDate }}</p>
+          <hr />
+          <p class="mt-6">{{ popUpData.activityNotes }}</p>
         </div>
         <ButtonSubmit @click="notesPopUpAction({}, false)" class="w-1/2 p-2">Close</ButtonSubmit>
+      </div>
+    </div>
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <div v-if="deletePopUp" class="note">
+      <div class="card m-auto flex h-[500px] w-[500px] flex-col items-center justify-between border-2 border-red-400 p-4">
+        <div class="text-center">
+          <p class="text-xs font-black">
+            {{ popUpData.clubName }}
+          </p>
+          <p class="mb-2 text-xs font-black">
+            {{ popUpData.activityName }}
+          </p>
+          <p class="mb-2 text-xs font-medium">{{ popUpData.activityDisplayDate }}</p>
+          <hr />
+          <p class="mt-6">{{ popUpData.activityNotes }}</p>
+        </div>
+        <div class="flex w-full gap-8">
+          <ButtonWarn @click="destroy(popUpData.activityId)" class="w-1/2 p-2">Delete </ButtonWarn>
+          <ButtonCancel @click="deletePopUpAction({}, false)" class="w-1/2 p-2">Cancel</ButtonCancel>
+        </div>
       </div>
     </div>
   </div>

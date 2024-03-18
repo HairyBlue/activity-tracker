@@ -26,7 +26,6 @@ function yearGenerated() {
 }
 
 router.get("/activity", async function (req, res) {
-
   let { pageSize, pageNumber, searchFilter, clubFilter, categoryFilter, year, orderBy } = req.query;
   let data: any = {};
   const page_size = Number(pageSize);
@@ -39,28 +38,28 @@ router.get("/activity", async function (req, res) {
     category: await show("SELECT categoryId, categoryName FROM Category", []),
   };
 
-  if (orderBy !== "" && orderBy !== "ASC") {
-    orderBy = "DESC";
-  } else if (orderBy == "") orderBy = "DESC";
+  if (orderBy !== "" && orderBy !== "DESC") {
+    orderBy = "ASC";
+  } else if (orderBy == "") orderBy = "ASC";
 
   if (searchFilter == "" && clubFilter == "" && categoryFilter == "") {
     data["result"] = await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE EXTRACT(YEAR FROM activity_created_at) = ${year} ORDER BY activity_created_at ${orderBy} LIMIT ${page_size} OFFSET ${offSet} `,
+      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ${year} ORDER BY activityStartDateIso ${orderBy} LIMIT ${page_size} OFFSET ${offSet}`,
       []
     );
   } else if (searchFilter !== "") {
     data["result"] = await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE activityName LIKE ? OR clubName LIKE ? OR categoryName LIKE ? or activityDisplayDate LIKE ? AND EXTRACT(YEAR FROM activity_created_at) = ${year} ORDER BY activity_created_at ${orderBy} LIMIT ${page_size} OFFSET ${offSet} `,
+      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE activityName LIKE ? OR clubName LIKE ? OR categoryName LIKE ? or activityDisplayDate LIKE ? AND YEAR(activityStartDateIso) = ${year} ORDER BY activityStartDateIso ${orderBy} LIMIT ${page_size} OFFSET ${offSet} `,
       [`%${searchFilter}%`, `%${searchFilter}%`, `%${searchFilter}%`, `%${searchFilter}%`]
     );
   } else if (clubFilter !== "") {
     data["result"] = await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE club_id = ? AND EXTRACT(YEAR FROM activity_created_at) = ${year} ORDER BY activity_created_at ${orderBy} LIMIT ${page_size} OFFSET ${offSet}`,
+      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE club_id = ? AND YEAR(activityStartDateIso) = ${year} ORDER BY activityStartDateIso ${orderBy} LIMIT ${page_size} OFFSET ${offSet}`,
       [Number(clubFilter)]
     );
   } else if (categoryFilter !== "") {
     data["result"] = await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE category_id = ? AND EXTRACT(YEAR FROM activity_created_at) = ${year} ORDER BY activity_created_at ${orderBy} LIMIT ${page_size} OFFSET ${offSet} `,
+      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE category_id = ? AND YEAR(activityStartDateIso) = ${year} ORDER BY activityStartDateIso_at ${orderBy} LIMIT ${page_size} OFFSET ${offSet} `,
       [Number(categoryFilter)]
     );
   }
@@ -112,4 +111,16 @@ router.put("/activity", async function (req, res) {
   logger.info(`activity was updated by ${user}`);
   res.json({ message: "success" });
 });
+
+router.delete("/activity/:id", async function (req, res) {
+  const user = (req as GetUserRequest).user;
+
+  const activityId = Number(req.params.id);
+
+  await destroy("DELETE FROM Activity WHERE activityId = ?", [activityId]);
+
+  logger.info(`activity was delete by ${user}`);
+  res.json({ message: "success" });
+});
+
 export { router };

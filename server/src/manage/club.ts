@@ -11,6 +11,7 @@ router.use(express.urlencoded({ extended: true }));
 
 function register() {
   router.get("/club", async function (req, res) {
+    const { year } = req.query;
     const data = await show("SELECT clubId, clubName, clubAcronym FROM Club", []);
     res.json({ key: "club", result: data });
   });
@@ -42,8 +43,17 @@ function register() {
     logger.info(`${user} is updating data in club`);
     res.json({ message: "success" });
   });
+
+  router.delete("/club/:id", async function (req, res) {
+    const user = (req as GetUserRequest).user;
+
+    const clubId = Number(req.params.id);
+  
+    await destroy("DELETE FROM Club WHERE clubId = ?", [clubId]);
+
+    logger.info(`club was delete by ${user}`);
+    res.json({ message: "success" });
+  });
   return router;
 }
-export {
-    register
-}
+export { register };

@@ -11,6 +11,7 @@ router.use(express.urlencoded({ extended: true }));
 
 function register() {
   router.get("/category", async function (req, res) {
+    const { year } = req.query;
     const data = await show("SELECT categoryId, categoryName FROM Category", []);
     res.json({ key: "category", result: data });
   });
@@ -47,9 +48,18 @@ function register() {
     res.json({ message: "success" });
   });
 
+  router.delete("/category/:id", async function (req, res) {
+    const user = (req as GetUserRequest).user;
+
+    const categoryId = Number(req.params.id);
+  
+    await destroy("DELETE FROM Category WHERE categoryId = ?", [categoryId]);
+
+    logger.info(`category was delete by ${user}`);
+    res.json({ message: "success" });
+  });
+
   return router;
 }
 
-export {
-    register
-}
+export { register };

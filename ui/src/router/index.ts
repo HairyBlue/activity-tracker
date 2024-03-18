@@ -19,7 +19,7 @@ const router = createRouter({
       component: () => import('../views/Activity.vue'),
     },
     {
-      path: '/clubs',
+      path: '/clubs-and-organizatons',
       name: 'clubs',
       component: () => import('../views/Clubs.vue'),
     },

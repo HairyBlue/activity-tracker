@@ -5,9 +5,10 @@ import editImg from '../assets/svg/edit.svg';
 
 import ButtonSubmit from './globals/buttons/ButtonSubmit.vue';
 import ButtonCancel from './globals/buttons/ButtonCancel.vue';
+import ButtonWarn from './globals/buttons/ButtonWarn.vue';
 // deps
 import { userStore } from '../store/userStore';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import router from '../router';
 import $ from 'jquery';
 const user = userStore();
@@ -31,11 +32,37 @@ const loading = ref<boolean>(false);
 const editActive = ref<boolean>(false);
 const windowSize = ref();
 
-const targetCard = ref<string>('category');
+const targetCard = ref<'category' | 'club' | 'target-activity'>('category');
 const columns = ref<Array<string>>([]);
 const rows = ref<Array<any>>([]);
 
 const activityFormData = ref<any>({});
+
+const year = ref<any>(new Date().getFullYear());
+
+const deletePopUpCategory = ref<boolean>(false);
+const deletePopUpClub = ref<boolean>(false);
+const deletePopUpTarget = ref<boolean>(false);
+
+const popUpDataCategory = ref<any>({});
+const popUpDataClub = ref<any>({});
+const popUpDataTarget = ref<any>({});
+
+function deletePopUpAction(data: any, active: boolean) {
+  if (targetCard.value == 'category') {
+    deletePopUpCategory.value = active;
+    popUpDataCategory.value = data;
+  }
+  if (targetCard.value == 'club') {
+    deletePopUpClub.value = active;
+    popUpDataClub.value = data;
+  }
+  if (targetCard.value == 'target-activity') {
+    deletePopUpTarget.value = active;
+    popUpDataTarget.value = data;
+  }
+}
+
 // CHECKs FORM*************************************
 function cleanForms() {
   categoryId.value = null;
@@ -58,6 +85,9 @@ function fetchData() {
     url: `/api/${targetCard.value}`,
     method: 'GET',
     contentType: 'application/json',
+    data: {
+      year: year.value,
+    },
     beforeSend: function (xhr) {
       xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
     },
@@ -75,7 +105,8 @@ function fetchData() {
         columns.value = ['name', 'target', 'year'];
         rows.value = data.result;
       }
-
+      isError.value = false;
+      errorMsg.value = '';
       loading.value = false;
     })
     .fail((jqXHR) => {
@@ -113,8 +144,6 @@ function submit() {
   })
     .done((data) => {
       if (data.message == 'success') {
-        isError.value = false;
-        errorMsg.value = '';
         fetchData();
         cleanForms();
       }
@@ -123,6 +152,11 @@ function submit() {
       if (jqXHR.status == 400) {
         isError.value = true;
         errorMsg.value = jqXHR.responseJSON.message;
+
+        setTimeout(() => {
+          isError.value = false;
+          errorMsg.value = '';
+        }, 10000);
       }
       if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
     });
@@ -160,14 +194,48 @@ function edit(active: boolean) {
     },
   })
     .done((data) => {
-      console.log(data)
       if (data.message == 'success') {
         fetchData();
         cleanForms();
       }
     })
     .fail((jqXHR) => {
-      console.log('ERR1: ' + JSON.stringify(jqXHR));
+      if (jqXHR.status == 400) {
+        isError.value = true;
+        errorMsg.value = jqXHR.responseJSON.message;
+
+        setTimeout(() => {
+          isError.value = false;
+          errorMsg.value = '';
+        }, 10000);
+      }
+    });
+}
+
+function destroy(id: any) {
+  $.ajax({
+    url: `/api/${targetCard.value}/${id}`,
+    method: 'DELETE',
+    contentType: 'application/json',
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
+    },
+  })
+    .done((data) => {
+      if (data.message == 'success') {
+        deletePopUpCategory.value = false;
+        deletePopUpClub.value = false;
+        deletePopUpTarget.value = false;
+        cleanForms();
+        fetchData();
+      }
+    })
+    .fail((jqXHR) => {
+      if (jqXHR.status == 400) {
+        isError.value = true;
+        errorMsg.value = jqXHR.responseJSON.message;
+      }
+      if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
     });
 }
 
@@ -184,7 +252,6 @@ function selectedCard(card: 'category' | 'club' | 'target-activity') {
 
 function editRowAction(data: any, active: boolean) {
   editActive.value = active;
-  console.log(data);
   if (targetCard.value == 'category') {
     categoryId.value = data.categoryId;
     categoryName.value = data.categoryName;
@@ -215,6 +282,13 @@ function cancel(active: boolean) {
 function checkWindowSize() {
   windowSize.value = window.innerWidth;
 }
+
+watch([year], ([yearNew], [yearOld]) => {
+  if (yearNew !== yearOld) {
+    fetchData();
+  }
+});
+
 onMounted(() => {
   fetchData();
   window.addEventListener('resize', checkWindowSize);
@@ -228,8 +302,8 @@ onUnmounted(() => {
 <template>
   <div id="manage-container" class="sm:p-6">
     <h1>Manage</h1>
-    <div class="flex gap-2">
-      <div id="activity-form" class="w-1/2">
+    <div class="flex h-full gap-2 max-md:flex-col">
+      <div id="activity-form" class="md:w-1/2">
         <!--  -->
         <!--  -->
         <section @click.self="selectedCard('category')" class="card w-ful p-4" :class="targetCard == 'category' ? 'border-2 border-red-400' : ''">
@@ -280,7 +354,7 @@ onUnmounted(() => {
         <section @click.self="selectedCard('target-activity')" class="card mt-2 w-full p-4" :class="targetCard == 'target-activity' ? 'border-2 border-red-400' : ''">
           <span class="text-lg">Target Activity</span>
           <div class="mt-2 flex flex-col text-start">
-            <label>Select a clubs/organization</label>
+            <label>Select clubs/organization</label>
             <select class="h-8" required v-model="targetActivityClubId">
               <option :value="null" selected disabled>clubs</option>
               <option v-for="club in activityFormData.clubs" :value="club.clubId">{{ club.clubName }} ({{ club.clubAcronym }})</option>
@@ -288,7 +362,7 @@ onUnmounted(() => {
           </div>
           <div class="flex gap-2">
             <div class="mt-2 flex w-1/2 flex-col text-start">
-              <label>Select a year</label>
+              <label>year</label>
               <select class="h-8" required v-model="targetActivityYear">
                 <option value="" selected disabled>year</option>
                 <option v-for="year in activityFormData.years" :value="year">{{ year }}</option>
@@ -311,13 +385,41 @@ onUnmounted(() => {
             </div>
           </div>
         </section>
+
+        <section v-if="targetCard == 'target-activity'" class="card mt-2 p-4">
+          <span>NOTE: Clubs and Organizations dont have target activity</span>
+          <div class="overflow-y-auto">
+            <table class="w-full table-auto">
+              <thead class="border-b">
+                <tr>
+                  <th class="text-start">name</th>
+                  <th class="text-start">acronym</th>
+                </tr>
+              </thead>
+              <tbody class="text-[10px]">
+                <tr v-if="targetCard == 'target-activity'" v-for="(row, idx) in activityFormData.clubNoAct" :class="idx % 2 == 1 ? 'grayed-out' : ''">
+                  <td>{{ row.clubName }}</td>
+                  <td>{{ row.clubAcronym }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
         <!--  -->
         <!--  -->
       </div>
-      <div class="card w-1/2">
+      <div class="card md:w-1/2">
         <div v-if="loading" class="flex h-full items-center justify-center text-2xl"><span>loading...</span></div>
-        <div v-else class="max-h-[520px] overflow-y-auto p-4">
-          <span>{{ targetCard.toUpperCase() }}</span>
+        <div v-else class="overflow-y-auto p-4">
+          <div class="flex items-center justify-between">
+            <span>{{ targetCard.toUpperCase() }}</span>
+            <div v-if="targetCard == 'target-activity'">
+              <select class="h-[20px] border px-8" v-model="year">
+                <option v-for="year of activityFormData.years" :value="year">{{ year }}</option>
+              </select>
+            </div>
+          </div>
+
           <table class="w-full table-auto">
             <thead class="border-b">
               <tr>
@@ -332,7 +434,7 @@ onUnmounted(() => {
                 <td>{{ row.categoryName }}</td>
                 <td :class="windowSize <= 768 ? '' : 'flex'">
                   <div @click="editRowAction(row, true)"><img :src="editImg" alt="" /></div>
-                  <div><img :src="deleteImg" alt="" /></div>
+                  <div @click="deletePopUpAction(row, true)"><img :src="deleteImg" alt="" /></div>
                 </td>
               </tr>
               <!--  -->
@@ -343,7 +445,7 @@ onUnmounted(() => {
 
                 <td :class="windowSize <= 768 ? '' : 'flex'">
                   <div @click="editRowAction(row, true)"><img :src="editImg" alt="" /></div>
-                  <div><img :src="deleteImg" alt="" /></div>
+                  <div @click="deletePopUpAction(row, true)"><img :src="deleteImg" alt="" /></div>
                 </td>
               </tr>
               <!--  -->
@@ -355,13 +457,84 @@ onUnmounted(() => {
 
                 <td :class="windowSize <= 768 ? '' : 'flex'">
                   <div @click="editRowAction(row, true)"><img :src="editImg" alt="" /></div>
-                  <div><img :src="deleteImg" alt="" /></div>
+                  <div @click="deletePopUpAction(row, true)"><img :src="deleteImg" alt="" /></div>
                 </td>
               </tr>
               <!--  -->
               <!--  -->
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <div v-if="deletePopUpCategory" class="note">
+      <div class="card m-auto flex h-[500px] flex-col items-center justify-between border-2 border-red-400 p-4">
+        <div class="text-center">
+          <h2 class="mb-2 text-2xl font-black">{{ targetCard.toLocaleUpperCase() }}</h2>
+          <hr />
+          <p class="text-base font-medium">
+            {{ popUpDataCategory.categoryName }}
+          </p>
+        </div>
+        <div class="text-red-400">
+          <span class="text-base font-black">Warning: </span>
+          Deleting this will also <span class="font-black">delete all data related</span> to this category.
+        </div>
+        <div class="flex w-full gap-8">
+          <ButtonWarn @click="destroy(popUpDataCategory.categoryId)" class="w-1/2 p-2">Are you sure you want to delete</ButtonWarn>
+          <ButtonCancel @click="deletePopUpAction({}, false)" class="w-1/2 p-2">Cancel</ButtonCancel>
+        </div>
+      </div>
+    </div>
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <div v-if="deletePopUpClub" class="note">
+      <div class="card m-auto flex h-[500px] flex-col items-center justify-between border-2 border-red-400 p-4">
+        <div class="text-center">
+          <h2 class="mb-2 text-2xl font-black">{{ targetCard.toLocaleUpperCase() }}</h2>
+          <hr />
+          <p class="text-base font-medium">
+            {{ popUpDataClub.clubAcronym }}
+          </p>
+          <p class="text-base font-medium">
+            {{ popUpDataClub.clubName }}
+          </p>
+        </div>
+        <div class="text-red-400">
+          <span class="text-base font-black">Warning: </span>
+          Deleting this will also <span class="font-black">delete all data related</span> to this category.
+        </div>
+        <div class="flex w-full gap-8">
+          <ButtonWarn @click="destroy(popUpDataClub.clubId)" class="w-1/2 p-2">Are you sure you want to delete</ButtonWarn>
+          <ButtonCancel @click="deletePopUpAction({}, false)" class="w-1/2 p-2">Cancel</ButtonCancel>
+        </div>
+      </div>
+    </div>
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <div v-if="deletePopUpTarget" class="note">
+      <div class="card m-auto flex h-[500px] flex-col items-center justify-between border-2 border-red-400 p-4">
+        <div class="text-center">
+          <h2 class="mb-2 text-2xl font-black">{{ targetCard.toLocaleUpperCase() }}</h2>
+          <hr />
+          <p class="text-base font-medium">{{ popUpDataTarget.clubName }} ({{ popUpDataTarget.clubAcronym }})</p>
+          <p class="text-base font-medium">Target Activity: {{ popUpDataTarget.targetActivityNumber }} in {{ popUpDataTarget.targetActivityYear }}</p>
+        </div>
+        <div class="text-red-400">
+          <span class="text-base font-black">Warning: </span>
+          Deleting this will <span class="font-black">affect the percentage computation</span> for the overview.
+        </div>
+        <div class="flex w-full gap-8">
+          <ButtonWarn @click="destroy(popUpDataTarget.targetActivityId)" class="w-1/2 p-2">Are you sure you want to delete</ButtonWarn>
+          <ButtonCancel @click="deletePopUpAction({}, false)" class="w-1/2 p-2">Cancel</ButtonCancel>
         </div>
       </div>
     </div>
@@ -375,7 +548,7 @@ h1 {
   text-align: start;
 }
 
-#activity-container {
+#manage-container {
   position: relative;
   min-height: 100%;
 }
@@ -398,5 +571,15 @@ img:hover {
 
 .grayed-out {
   background-color: rgba(156, 163, 175, 25%);
+}
+
+.note {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 </style>

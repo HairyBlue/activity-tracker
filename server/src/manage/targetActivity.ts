@@ -26,17 +26,33 @@ function yearGenerated() {
 //   }
 //   return random;
 // }
+
+async function clubsNoTargetActivity(year: any) {
+  const data: any = [];
+  const clubs: any = await show("SELECT clubId, clubName, clubAcronym FROM Club", []);
+  for (let club of clubs) {
+    const res: any = await show("SELECT COUNT(*) as count FROM TargetActivity WHERE club_id = ? AND targetActivityYear = ?", [club.clubId, year]);
+
+    if (res[0].count == 0) {
+      data.push(club);
+    }
+  }
+  return data;
+}
+
 function register() {
   router.get("/target-activity", async function (req, res) {
+    const { year } = req.query;
     const data = {
       key: "target-activity",
       formData: {
         clubs: await show("SELECT clubId, clubName, clubAcronym FROM Club", []),
+        clubNoAct: await clubsNoTargetActivity(year),
         years: yearGenerated(),
       },
       result: await show(
-        "SELECT targetActivityId, targetActivityNumber, targetActivityYear, club_id, clubName, clubAcronym FROM TargetActivity INNER JOIN Club ON club_id = clubId",
-        []
+        "SELECT targetActivityId, targetActivityNumber, targetActivityYear, club_id, clubName, clubAcronym FROM TargetActivity INNER JOIN Club ON club_id = clubId WHERE targetActivityYear = ?",
+        [year]
       ),
     };
     res.json(data);
@@ -46,23 +62,32 @@ function register() {
     const user = (req as GetUserRequest).user;
     let { targetActivityClubId, targetActivityNumber, targetActivityYear } = req.body;
 
-    if (targetActivityClubId === null || targetActivityYear === "") {
-      logger.warn(`${user} is failed to post data in target activity`);
-      res.status(400).json({ message: "Please complete the form" });
-      return;
-    }
+    const checkIfNotDup: any = await show("Select COUNT(*) as count FROM TargetActivity WHERE club_id = ? AND targetActivityYear = ?", [
+      targetActivityClubId,
+      targetActivityYear,
+    ]);
+
     if (typeof targetActivityNumber == "string") {
       targetActivityNumber = 0;
     }
 
-    await create("INSERT INTO TargetActivity (club_id, targetActivityNumber, targetActivityYear) values (?, ?, ?)", [
-      targetActivityClubId,
-      targetActivityNumber,
-      targetActivityYear,
-    ]);
-
-    logger.info(`${user} is positng data in target activity`);
-    res.json({ message: "success" });
+    if (targetActivityClubId === null || targetActivityYear === "") {
+      logger.warn(`${user} is failed to post data in target activity`);
+      res.status(400).json({ message: "Please complete the form" });
+      return;
+    } else if (checkIfNotDup[0].count > 0) {
+      logger.warn(`${user} is failed to post data in target activity`);
+      res.status(400).json({ message: "Duplicate Entry" });
+      return;
+    } else {
+      await create("INSERT INTO TargetActivity (club_id, targetActivityNumber, targetActivityYear) values (?, ?, ?)", [
+        targetActivityClubId,
+        targetActivityNumber,
+        targetActivityYear,
+      ]);
+      logger.info(`${user} is positng data in target activity`);
+      res.json({ message: "success" });
+    }
   });
 
   router.put("/target-activity", async function (req, res) {
@@ -88,6 +113,16 @@ function register() {
     res.json({ message: "success" });
   });
 
+  router.delete("/target-activity/:id", async function (req, res) {
+    const user = (req as GetUserRequest).user;
+
+    const targetActivityId = Number(req.params.id);
+
+    await destroy("DELETE FROM TargetActivity WHERE targetActivityId = ?", [targetActivityId]);
+
+    logger.info(`club was delete by ${user}`);
+    res.json({ message: "success" });
+  });
   return router;
 }
 export { register };

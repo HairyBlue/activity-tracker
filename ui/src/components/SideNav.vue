@@ -14,7 +14,7 @@ import manageSvg from '../assets/svg/manage.svg';
       <router-link to="/activity">
         <div><img :src="activitySvg" alt="activity" /></div
       ></router-link>
-      <router-link to="/clubs">
+      <router-link to="/clubs-and-organizatons">
         <div><img :src="clubsSvg" alt="clubs" /></div>
       </router-link>
       <router-link to="/manage">

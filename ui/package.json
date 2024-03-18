@@ -9,8 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "chart.js": "^4.4.2",
+    "chartjs-plugin-datalabels": "^2.2.0",
+    "html2canvas": "^1.4.1",
     "jquery": "^3.7.1",
+    "jspdf": "^2.5.1",
     "pinia": "^2.1.7",
+    "v-calendar": "^3.1.2",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5"
   },

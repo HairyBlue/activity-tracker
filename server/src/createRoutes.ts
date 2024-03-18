@@ -7,6 +7,7 @@ import * as middleware from "./verifyClient";
 import * as club from "./manage/club";
 import * as category from "./manage/category";
 import * as targetActivity from "./manage/targetActivity";
+import * as clubOrg from "./clubsandorg"
 function createRoutes() {
   const app = express();
   const verifyClient = middleware.verifyClient;
@@ -29,6 +30,7 @@ function createRoutes() {
   app.use("/api", club.register());
   app.use("/api", category.register());
   app.use("/api", targetActivity.register());
+  app.use("/api", clubOrg.router)
   return app;
 }
 export default createRoutes;
