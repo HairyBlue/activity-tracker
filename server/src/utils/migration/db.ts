@@ -135,7 +135,7 @@ async function seedActivity() {
           // const activitySemester = Math.floor(Math.random() * 2) + 1;
           if (displayDate) {
             (await connection).execute(
-              "INSERT INTO activity (club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, activityDisplayDate, activitySemester) values (?, ?, ?, ?, ?, ?, ?)",
+              "INSERT INTO activity (club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, activityDisplayDate) values (?, ?, ?, ?, ?, ?, ?)",
               [club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, displayDate]
             );
           }
