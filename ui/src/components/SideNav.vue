@@ -9,16 +9,16 @@ import manageSvg from '../assets/svg/manage.svg';
   <aside>
     <nav>
       <router-link to="/overview">
-        <div><img :src="dashboardSvg" alt="overview" /></div
+        <div aria-label="Overview" class="tooltip" aria-expanded="false"><img :src="dashboardSvg" alt="overview" /></div
       ></router-link>
       <router-link to="/activity">
-        <div><img :src="activitySvg" alt="activity" /></div
+        <div aria-label="Activity" class="tooltip" aria-expanded="false"><img :src="activitySvg" alt="activity" /></div
       ></router-link>
       <router-link to="/clubs-and-organizatons">
-        <div><img :src="clubsSvg" alt="clubs" /></div>
+        <div aria-label="Clubs and Oraginzations" class="tooltip" aria-expanded="false"><img :src="clubsSvg" alt="clubs" /></div>
       </router-link>
       <router-link to="/manage">
-        <div><img :src="manageSvg" alt="manage" /></div>
+        <div aria-label="Manage" class="tooltip" aria-expanded="false"><img :src="manageSvg" alt="manage" /></div>
       </router-link>
     </nav>
   </aside>
@@ -47,5 +47,37 @@ aside > nav > a > div,
 img {
   cursor: pointer;
   min-width: 24px;
+}
+
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  display: none;
+}
+
+.tooltip[aria-label]:hover:after {
+  content: attr(aria-label);
+  position: absolute;
+  display: block;
+  top: 2px;
+  left: 50px;
+  font-weight: 500;
+  font-size: large;
+  font-weight: 900;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  background-color: var(--white-color);
+  border-radius: 4px;
+  padding: 4px 6px;
+  text-wrap: nowrap;
+  /* color: $white;
+
+  white-space: nowrap;
+  text-decoration: none;
+  text-indent: 0;
+  overflow: visible;
+  padding: 8px;
+  border-radius: 5px; */
 }
 </style>

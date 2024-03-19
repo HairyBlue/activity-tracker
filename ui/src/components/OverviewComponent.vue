@@ -28,6 +28,8 @@ const pieCharData = ref<Array<number>>([]);
 const clubHasAct = ref<Array<any>>([]);
 const clubNoAct = ref<Array<any>>([]);
 const latest20Activity = ref<Array<any>>([]);
+
+const semester = ref<'1' | '2'>('1');
 // Be carefull on this as condition depends on string
 
 function chartLineDataCt(data: any[]) {
@@ -60,7 +62,7 @@ function fetchData() {
     url: '/api/overview',
     method: 'GET',
     contentType: 'application/json',
-    data: { year: year.value },
+    data: { year: year.value, semester: semester.value },
     beforeSend: function (xhr) {
       xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
     },
@@ -106,8 +108,13 @@ function downloadPdf() {
 
     const img = canvas.toDataURL('image/png');
 
-    pdf.addImage(img, 'PNG', x, y, chartWidth, chartHeight);
-    pdf.save(`ACTIVITIES DONE [${year.value}].pdf`);
+    pdf.addImage(img, 'PNG', x, y, chartWidth, chartHeight, undefined, 'FAST');
+    if (semester.value == '1') {
+      pdf.save(`Clubs, Organizations And Colleges Activities For First Semester SY ${year.value}-${Number(year.value) + 1} [${chartType.value} chart].pdf`);
+    }
+    if (semester.value == '2') {
+      pdf.save(`Clubs, Organizations And Colleges Activities For Second Semester SY ${year.value}-${Number(year.value) + 1} [${chartType.value} chart].pdf`);
+    }
   });
 }
 
@@ -116,14 +123,19 @@ function clearChartData() {
   labelsPct.value = [];
   datasetsCt.value = [];
   datasetsPct.value = [];
+  pieCharData.value = [];
 }
 
-watch([chartType, year], ([newType, newYear], [oldType, oldYear]) => {
+watch([chartType, year, semester], ([newType, newYear, newSemester], [oldType, oldYear, oldSemester]) => {
   if (newType !== oldType) {
     clearChartData();
     fetchData();
   }
   if (newYear !== oldYear) {
+    clearChartData();
+    fetchData();
+  }
+  if (newSemester !== oldSemester) {
     clearChartData();
     fetchData();
   }
@@ -138,12 +150,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="overview-container" class="sm:p-6">
+  <div id="overview-container" class="md:p-6">
     <!--  -->
     <!--  -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between max-md:flex-col">
       <h1>Overview</h1>
-      <div class="mr-4 flex gap-2">
+      <div class="mr-4 flex gap-2 max-md:flex-wrap">
         <div>
           <select class="h-[30px] border px-2 py-1" v-model="chartType">
             <option value="line">Line Chart</option>
@@ -161,21 +173,35 @@ onMounted(() => {
             <option v-for="year of years" :value="year">{{ year }}</option>
           </select>
         </div>
+        <div>
+          <select class="h-[30px] border px-8 py-1" v-model="semester">
+            <option :value="1">First Semester</option>
+            <option :value="2">Second Semester</option>
+          </select>
+        </div>
         <ButtonSubmit v-if="labelsCt.length > 0 && labelsPct.length > 0" @click="downloadPdf" class="h-[30px] border px-8 py-1">Download PDF</ButtonSubmit>
       </div>
     </div>
     <!--  -->
     <!--  -->
     <section id="content" class="h-[60vh]">
-      <LineChartOverviewCt v-if="labelsCt.length > 0 && countOrPct == 'count'" :label="labelsCt" :dataset="datasetsCt" :type="chartType" />
-      <LineChartOverviewPct v-if="labelsCt.length > 0 && countOrPct == 'percentage'" :label="labelsPct" :dataset="datasetsPct" :type="chartType" />
+      <LineChartOverviewCt v-if="labelsCt.length > 0 && countOrPct == 'count'" :label="labelsCt" :dataset="datasetsCt" :type="chartType"
+        ><slot
+          >Clubs, Organizations And Colleges Activities For
+          {{ semester == '1' ? `First Semester SY ${year}-${Number(year) + 1}` : `Second Semester SY ${year}-${Number(year) + 1}` }}</slot
+        ></LineChartOverviewCt
+      >
+      <LineChartOverviewPct v-if="labelsCt.length > 0 && countOrPct == 'percentage'" :label="labelsPct" :dataset="datasetsPct" :type="chartType"
+        >Clubs, Organizations And Colleges Activities For
+        {{ semester == '1' ? `First Semester SY ${year}-${Number(year) + 1}` : `Second Semester SY ${year}-${Number(year) + 1}` }}</LineChartOverviewPct
+      >
     </section>
 
-    <section class="flex h-[600px] w-full gap-2">
-      <section class="card mt-2 w-1/2 p-4">
+    <section class="flex w-full gap-2 max-lg:flex-col lg:h-[500px]">
+      <section class="card mt-2 p-4 lg:w-1/2">
         <DoughnutChart v-if="pieCharData.length > 0" :dataset="pieCharData" />
       </section>
-      <section class="card mt-2 w-1/4 overflow-y-auto p-4">
+      <section class="card mt-2 overflow-y-auto p-4">
         <span>Clubs and Organizations have target activity</span>
         <div class="overflow-y-auto">
           <table class="w-full table-auto">
@@ -194,7 +220,7 @@ onMounted(() => {
           </table>
         </div>
       </section>
-      <section class="card mt-2 w-1/4 overflow-y-auto p-4">
+      <section class="card mt-2 overflow-y-auto p-4">
         <span>Clubs and Organizations dont have target activity</span>
         <div class="overflow-y-auto">
           <table class="w-full table-auto">
@@ -226,7 +252,7 @@ onMounted(() => {
             <th>Date</th>
           </tr>
         </thead>
-        <tbody class="max-sm:text-[10px] md:text-[14px]">
+        <tbody class="max-sm:text-[10px] md:text-[12px]">
           <tr v-for="(row, idx) in latest20Activity" :key="idx" class="text-center" :class="idx % 2 == 1 ? 'grayed-out' : ''">
             <td>{{ row.clubName }}</td>
             <td>{{ row.activityName }}</td>

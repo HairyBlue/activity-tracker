@@ -114,8 +114,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="card h-[60vh] w-[93vw] p-12">
-    <h2 class="text-center text-lg font-medium">Total number of activities in each club</h2>
+  <div class="card h-[60vh] w-[92vw] p-6">
+    <h2 class="text-center text-lg font-semibold"><slot></slot></h2>
     <canvas ref="chartCanvaCt"> </canvas>
   </div>
 </template>

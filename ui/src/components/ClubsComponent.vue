@@ -25,6 +25,7 @@ const years = ref<Array<string>>([]);
 
 const isClick = ref<number>(0);
 
+const semester = ref<'1' | '2'>('1');
 function chartCategoryRef(categories: any[]) {
   for (let c of categories) {
     if (clubKey.value == `${c.clubName}-${c.clubAcronym}`) {
@@ -51,7 +52,7 @@ function fetchData() {
     url: '/api/clubs-organizatons',
     method: 'GET',
     contentType: 'application/json',
-    data: { year: year.value },
+    data: { year: year.value, semester: semester.value },
     beforeSend: function (xhr) {
       xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
     },
@@ -107,13 +108,22 @@ function downloadPdf() {
 
     const img = canvas.toDataURL('image/png');
 
-    pdf.addImage(img, 'PNG', x, y, chartWidth, chartHeight);
-    pdf.save(`${clubKey.value} [${year.value}].pdf`);
+    pdf.addImage(img, 'PNG', x, y, chartWidth, chartHeight, undefined, 'FAST');
+    if (semester.value == '1') {
+      pdf.save(`${clubKey.value} First Semester Activities For SY ${year.value}-${Number(year.value) + 1}.pdf`);
+    }
+    if (semester.value == '2') {
+      pdf.save(`${clubKey.value} Second Semester Activities For SY ${year.value}-${Number(year.value) + 1}.pdf`);
+    }
   });
 }
 
-watch([year], ([yearNew], [yearOld]) => {
+watch([year, semester], ([yearNew, newSemester], [yearOld, oldSemester]) => {
   if (yearNew !== yearOld) {
+    resetData();
+    fetchData();
+  }
+  if (newSemester !== oldSemester) {
     resetData();
     fetchData();
   }
@@ -134,7 +144,7 @@ setTimeout(() => {
 </script>
 
 <template>
-  <div id="club-container" class="sm:p-6">
+  <div id="club-container" class="md:p-6">
     <!--  -->
     <!--  -->
     <div class="flex items-center justify-between">
@@ -143,6 +153,12 @@ setTimeout(() => {
         <div>
           <select class="h-[30px] border px-8 py-1" v-model="year">
             <option v-for="year of years" :value="year">{{ year }}</option>
+          </select>
+        </div>
+        <div>
+          <select class="h-[30px] border px-8 py-1" v-model="semester">
+            <option :value="1">First Semester</option>
+            <option :value="2">Second Semester</option>
           </select>
         </div>
         <ButtonSubmit v-if="categoryLabels.length > 0 && monthsData.length > 0" @click="downloadPdf" class="h-[30px] border px-8 py-1">Download PDF</ButtonSubmit>
@@ -168,9 +184,12 @@ setTimeout(() => {
     <!--  -->
     <!--  -->
     <section id="content" class="h-full">
-      <h2 class="mt-4 text-center text-xl font-semibold">{{ clubKey }}</h2>
+      <!-- <h2 class="mt-4 text-center text-xl font-semibold">{{ clubKey }}</h2> -->
+
       <section class="mt-2">
-        <BarChart v-if="categoryDatasets.length > 0" :label="categoryLabels" :dataset="categoryDatasets" />
+        <BarChart v-if="categoryDatasets.length > 0" :label="categoryLabels" :dataset="categoryDatasets"
+          >{{ clubKey }} {{ semester == '1' ? `First Semester SY ${year}-${Number(year) + 1}` : `Second Semester SY ${year}-${Number(year) + 1}` }}</BarChart
+        >
       </section>
       <section class="mt-2 max-md:mr-2">
         <!-- <div v-for="(label, idx) of monthsLabels">

@@ -132,11 +132,12 @@ async function seedActivity() {
           const displayDate = validateDates(activityStartDateIso, activityEndDateIso);
           const activityName = faker.company.name();
           const activityNotes = faker.lorem.sentences();
-          // const activitySemester = Math.floor(Math.random() * 2) + 1;
+          const activitySemester = Math.floor(Math.random() * 2) + 1;
+          
           if (displayDate) {
             (await connection).execute(
-              "INSERT INTO activity (club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, activityDisplayDate) values (?, ?, ?, ?, ?, ?, ?)",
-              [club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, displayDate]
+              "INSERT INTO activity (club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, activityDisplayDate, activitySemester) values (?, ?, ?, ?, ?, ?, ?, ?)",
+              [club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, displayDate, activitySemester.toString()]
             );
           }
         }

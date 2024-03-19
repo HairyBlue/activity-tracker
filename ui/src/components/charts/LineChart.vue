@@ -88,7 +88,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="card h-[32vh] w-[90vw]">
+  <div class="card h-[40vh] w-[92vw] p-6">
     <canvas ref="chartCanva"> </canvas>
   </div>
 </template>

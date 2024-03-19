@@ -46,6 +46,8 @@ const orderBy = ref<any>('');
 const pageSize = ref<number>(20);
 const pageNumber = ref<number>(1);
 
+const activitySemester = ref<'1' | '2'>('1');
+const semester = ref<'1' | '2'>('1');
 const windowSize = ref();
 // NOTE: DATA MANIPULATION
 function notesPopUpAction(data: any, active: boolean) {
@@ -68,6 +70,7 @@ function editRowAction(data: any, active: boolean) {
   activityNotes.value = data.activityNotes;
   activityStartDateIso.value = data.activityStartDateIso;
   activityEndDateIso.value = data.activityEndDateIso;
+  activitySemester.value = data.activitySemester;
 }
 
 function deleteRowAction(data: any, active: boolean) {
@@ -89,6 +92,7 @@ function cleanForm() {
   activityNotes.value = '';
   activityStartDateIso.value = '';
   activityEndDateIso.value = '';
+  activitySemester.value = '1';
 }
 
 function fetchData() {
@@ -104,12 +108,12 @@ function fetchData() {
       categoryFilter: categoryFilter.value,
       year: year.value,
       orderBy: orderBy.value,
+      semester: semester.value,
     },
     beforeSend: function (xhr) {
       xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
     },
   }).then((data) => {
-    console.log(data);
     recordSize.value = data.count[0].count;
     clubs.value = data.formdata.club;
     categories.value = data.formdata.category;
@@ -130,6 +134,7 @@ function submit() {
       activityNotes: activityNotes.value,
       activityStartDateIso: activityStartDateIso.value,
       activityEndDateIso: activityEndDateIso.value,
+      activitySemester: activitySemester.value,
     }),
     beforeSend: function (xhr) {
       xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
@@ -164,6 +169,7 @@ function edit() {
       activityNotes: activityNotes.value,
       activityStartDateIso: activityStartDateIso.value,
       activityEndDateIso: activityEndDateIso.value,
+      activitySemester: activitySemester.value,
     }),
     beforeSend: function (xhr) {
       xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
@@ -247,10 +253,10 @@ function resetFilter() {
 
 // TODO: CLEAN UP WATCH
 watch(
-  [pageSize, searchFilter, clubFilter, categoryFilter, year, orderBy],
+  [pageSize, searchFilter, clubFilter, categoryFilter, year, orderBy, semester],
   (
-    [newPageSize, newSearchFilter, newClubFilter, newCategoryFilter, newYear, newOrderBy],
-    [oldPageSize, oldSearchFilter, oldClubFilter, oldCategoryFilter, oldYear, oldOrderBy]
+    [newPageSize, newSearchFilter, newClubFilter, newCategoryFilter, newYear, newOrderBy, newSemester],
+    [oldPageSize, oldSearchFilter, oldClubFilter, oldCategoryFilter, oldYear, oldOrderBy, oldSemester]
   ) => {
     if (newPageSize !== oldPageSize) {
       pageNumber.value = 1;
@@ -261,6 +267,7 @@ watch(
     if (newCategoryFilter !== oldCategoryFilter) fetchData();
     if (newYear !== oldYear) fetchData();
     if (newOrderBy !== oldOrderBy) fetchData();
+    if (newSemester !== oldSemester) fetchData();
   }
 );
 
@@ -274,7 +281,7 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <div id="activity-container" class="sm:p-6">
+  <div id="activity-container" class="md:p-6">
     <h1>Activity</h1>
     <!--  -->
     <!--  -->
@@ -305,7 +312,13 @@ onUnmounted(() => {
               <option v-for="category in categories" :value="category.categoryId">{{ category.categoryName }}</option>
             </select>
           </section>
-
+          <section class="mt-4 flex flex-col text-start">
+            <label>Semester</label>
+            <select class="h-8" v-model="activitySemester">
+              <option :value="1">First Semester</option>
+              <option :value="2">Second Semester</option>
+            </select>
+          </section>
           <section class="mt-4 flex flex-col text-start">
             <label>Start date <span class="text-red-500">*</span></label>
             <input type="date" class="h-8" v-model="activityStartDateIso" required />
@@ -352,6 +365,12 @@ onUnmounted(() => {
           <div>
             <select class="w-full py-1 md:w-[150px]" v-model="year">
               <option v-for="years in yearObj" :value="years">{{ years }}</option>
+            </select>
+          </div>
+          <div>
+            <select class="w-full py-1 md:w-[150px]" v-model="semester">
+              <option :value="1">First Semester</option>
+              <option :value="2">Second Semester</option>
             </select>
           </div>
           <div>

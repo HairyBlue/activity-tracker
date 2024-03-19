@@ -26,7 +26,7 @@ function yearGenerated() {
 }
 
 router.get("/activity", async function (req, res) {
-  let { pageSize, pageNumber, searchFilter, clubFilter, categoryFilter, year, orderBy } = req.query;
+  let { pageSize, pageNumber, searchFilter, clubFilter, categoryFilter, year, orderBy, semester } = req.query;
   let data: any = {};
   const page_size = Number(pageSize);
   const offSet: number = (Number(pageNumber) - 1) * page_size;
@@ -44,7 +44,7 @@ router.get("/activity", async function (req, res) {
 
   if (searchFilter == "" && clubFilter == "" && categoryFilter == "") {
     data["result"] = await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ${year} ORDER BY activityStartDateIso ${orderBy} LIMIT ${page_size} OFFSET ${offSet}`,
+      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ${year} AND activitySemester = ${semester} ORDER BY activityStartDateIso ${orderBy} LIMIT ${page_size} OFFSET ${offSet}`,
       []
     );
   } else if (searchFilter !== "") {
@@ -54,12 +54,12 @@ router.get("/activity", async function (req, res) {
     );
   } else if (clubFilter !== "") {
     data["result"] = await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE club_id = ? AND YEAR(activityStartDateIso) = ${year} ORDER BY activityStartDateIso ${orderBy} LIMIT ${page_size} OFFSET ${offSet}`,
+      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE club_id = ? AND YEAR(activityStartDateIso) = ${year} AND activitySemester = ${semester} ORDER BY activityStartDateIso ${orderBy} LIMIT ${page_size} OFFSET ${offSet}`,
       [Number(clubFilter)]
     );
   } else if (categoryFilter !== "") {
     data["result"] = await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE category_id = ? AND YEAR(activityStartDateIso) = ${year} ORDER BY activityStartDateIso_at ${orderBy} LIMIT ${page_size} OFFSET ${offSet} `,
+      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE category_id = ? AND YEAR(activityStartDateIso) = ${year} AND activitySemester = ${semester} ORDER BY activityStartDateIso_at ${orderBy} LIMIT ${page_size} OFFSET ${offSet} `,
       [Number(categoryFilter)]
     );
   }
@@ -69,7 +69,7 @@ router.get("/activity", async function (req, res) {
 
 router.post("/activity", async function (req, res) {
   const user = (req as GetUserRequest).user;
-  const { club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso } = req.body;
+  const { club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, activitySemester } = req.body;
   const displayDate = validateDates(activityStartDateIso, activityEndDateIso);
 
   if (!club_id || !category_id || activityName == "") {
@@ -80,8 +80,8 @@ router.post("/activity", async function (req, res) {
     res.status(400).json({ message: "Please select or change the date" });
   } else {
     await create(
-      "INSERT INTO Activity (club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, activityDisplayDate) values (?, ?, ?, ?, ?, ?, ?)",
-      [club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, displayDate]
+      "INSERT INTO Activity (club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, activityDisplayDate, activitySemester) values (?, ?, ?, ?, ?, ?, ?, ?)",
+      [club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, displayDate, activitySemester]
     );
   }
 
@@ -91,8 +91,8 @@ router.post("/activity", async function (req, res) {
 
 router.put("/activity", async function (req, res) {
   const user = (req as GetUserRequest).user;
-
-  const { activityId, club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso } = req.body;
+  console.log(req.body);
+  const { activityId, club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, activitySemester } = req.body;
   const displayDate = validateDates(activityStartDateIso, activityEndDateIso);
 
   if (!club_id || !category_id || activityName == "") {
@@ -103,8 +103,8 @@ router.put("/activity", async function (req, res) {
     res.status(400).json({ message: "Please select or change the date" });
   } else {
     await update(
-      "UPDATE Activity SET club_id = ?, category_id = ?, activityName = ?, activityNotes = ?, activityStartDateIso = ?, activityEndDateIso = ?, activityDisplayDate = ? WHERE activityId = ?",
-      [club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, displayDate, activityId]
+      "UPDATE Activity SET club_id = ?, category_id = ?, activityName = ?, activityNotes = ?, activityStartDateIso = ?, activityEndDateIso = ?, activityDisplayDate = ?, activitySemester = ? WHERE activityId = ?",
+      [club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, displayDate, activitySemester, activityId]
     );
   }
 

@@ -48,6 +48,9 @@ const popUpDataCategory = ref<any>({});
 const popUpDataClub = ref<any>({});
 const popUpDataTarget = ref<any>({});
 
+const semester = ref<'1' | '2'>('1');
+const targetActivitySemester = ref<'1' | '2'>('1');
+
 function deletePopUpAction(data: any, active: boolean) {
   if (targetCard.value == 'category') {
     deletePopUpCategory.value = active;
@@ -76,17 +79,20 @@ function cleanForms() {
   targetActivityClubId.value = null;
   targetActivityYear.value = '';
   targetActivityNumber.value = 0;
+  targetActivitySemester.value = '1';
 }
 
 // FETCH EVENT ************************************************
 function fetchData() {
   loading.value = true;
+  console.log(targetCard.value);
   $.ajax({
     url: `/api/${targetCard.value}`,
     method: 'GET',
     contentType: 'application/json',
     data: {
       year: year.value,
+      semester: semester.value,
     },
     beforeSend: function (xhr) {
       xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
@@ -134,6 +140,7 @@ function submit() {
             targetActivityClubId: targetActivityClubId.value,
             targetActivityNumber: targetActivityNumber.value,
             targetActivityYear: targetActivityYear.value,
+            targetActivitySemester: targetActivitySemester.value,
           };
         }
       })()
@@ -164,7 +171,6 @@ function submit() {
 
 // UPDATE EVENT ************************************************
 function edit(active: boolean) {
-  editActive.value = active;
   $.ajax({
     url: `/api/${targetCard.value}`,
     method: 'PUT',
@@ -185,6 +191,7 @@ function edit(active: boolean) {
             targetActivityNumber: targetActivityNumber.value,
             targetActivityYear: targetActivityYear.value,
             targetActivityId: targetActivityId.value,
+            targetActivitySemester: targetActivitySemester.value,
           };
         }
       })()
@@ -195,6 +202,7 @@ function edit(active: boolean) {
   })
     .done((data) => {
       if (data.message == 'success') {
+        editActive.value = active;
         fetchData();
         cleanForms();
       }
@@ -205,6 +213,8 @@ function edit(active: boolean) {
         errorMsg.value = jqXHR.responseJSON.message;
 
         setTimeout(() => {
+          cleanForms();
+          editActive.value = false;
           isError.value = false;
           errorMsg.value = '';
         }, 10000);
@@ -264,6 +274,7 @@ function editRowAction(data: any, active: boolean) {
     targetActivityClubId.value = data.club_id;
     targetActivityYear.value = data.targetActivityYear;
     targetActivityNumber.value = data.targetActivityNumber;
+    targetActivitySemester.value = data.targetActivitySemester;
   }
 }
 
@@ -274,8 +285,14 @@ function cancel(active: boolean) {
     clubName.value = '';
     clubAcronym.value = '';
   } else if (targetCard.value == 'target-activity') {
+    targetActivityClubId.value = null;
+    targetActivityYear.value = '';
+    targetActivityNumber.value = 0;
+    targetActivitySemester.value = '1';
   }
   editActive.value = active;
+  errorMsg.value = '';
+  isError.value = false;
 }
 
 // NOTE: WINDOW SIZE LISTENER
@@ -283,8 +300,11 @@ function checkWindowSize() {
   windowSize.value = window.innerWidth;
 }
 
-watch([year], ([yearNew], [yearOld]) => {
+watch([year, semester], ([yearNew, semesterNew], [yearOld, semesterOld]) => {
   if (yearNew !== yearOld) {
+    fetchData();
+  }
+  if (semesterNew !== semesterOld) {
     fetchData();
   }
 });
@@ -300,7 +320,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div id="manage-container" class="sm:p-6">
+  <div id="manage-container" class="md:p-6">
     <h1>Manage</h1>
     <div class="flex h-full gap-2 max-md:flex-col">
       <div id="activity-form" class="md:w-1/2">
@@ -362,15 +382,22 @@ onUnmounted(() => {
           </div>
           <div class="flex gap-2">
             <div class="mt-2 flex w-1/2 flex-col text-start">
-              <label>year</label>
+              <label>Year</label>
               <select class="h-8" required v-model="targetActivityYear">
                 <option value="" selected disabled>year</option>
                 <option v-for="year in activityFormData.years" :value="year">{{ year }}</option>
               </select>
             </div>
-            <div class="mt-2 flex w-1/2 flex-col text-start">
-              <label>Enter number of activities</label>
+            <div class="mt-2 flex flex-col text-start">
+              <label>Number of activities</label>
               <input type="number" min="0" class="h-8" required placeholder="default is 0" v-model="targetActivityNumber" />
+            </div>
+            <div class="mt-2 flex flex-col text-start">
+              <label>Semester</label>
+              <select class="h-8" v-model="targetActivitySemester">
+                <option :value="1">First Semester</option>
+                <option :value="2">Second Semester</option>
+              </select>
             </div>
           </div>
 
@@ -413,10 +440,18 @@ onUnmounted(() => {
         <div v-else class="overflow-y-auto p-4">
           <div class="flex items-center justify-between">
             <span>{{ targetCard.toUpperCase() }}</span>
-            <div v-if="targetCard == 'target-activity'">
-              <select class="h-[20px] border px-8" v-model="year">
-                <option v-for="year of activityFormData.years" :value="year">{{ year }}</option>
-              </select>
+            <div class="flex gap-2">
+              <div class="flex text-start">
+                <select class="h-8" v-model="semester">
+                  <option :value="1">First Semester</option>
+                  <option :value="2">Second Semester</option>
+                </select>
+              </div>
+              <div v-if="targetCard == 'target-activity'">
+                <select class="h-8" v-model="year">
+                  <option v-for="year of activityFormData.years" :value="year">{{ year }}</option>
+                </select>
+              </div>
             </div>
           </div>
 

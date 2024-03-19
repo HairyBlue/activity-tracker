@@ -10,7 +10,7 @@ const logger = logging.wichFileToLog("clubAndOrg");
 const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 
-async function getCategoryCount(year: any) {
+async function getCategoryCount(year: any, semester: any) {
   const clubs: any = await show("SELECT clubName, clubAcronym, REPLACE(clubName, ' ', '_') AS clubKey, clubId from Club", []);
   const categories: any = await show("SELECT categoryName, REPLACE(categoryName, ' ', '_') AS categoryKey, categoryId FROM Category", []);
   let obj: any = {};
@@ -22,8 +22,8 @@ async function getCategoryCount(year: any) {
     obj[club.clubKey]["category"] = [];
     for (let category of categories) {
       const result: any = await show(
-        "SELECT COUNT(*) AS count FROM Activity WHERE club_id = ? AND category_id = ? AND YEAR(activityStartDateIso) = ?",
-        [club.clubId, category.categoryId, year]
+        "SELECT COUNT(*) AS count FROM Activity WHERE club_id = ? AND category_id = ? AND YEAR(activityStartDateIso) = ? AND activitySemester = ?",
+        [club.clubId, category.categoryId, year, semester]
       );
 
       obj[club.clubKey]["category"].push({ categoryName: category.categoryName, count: result[0].count });
@@ -36,27 +36,7 @@ async function getCategoryCount(year: any) {
 
 // getCategoryCount();
 
-async function getClubCount(year: any) {
-  const clubs: any = await show("SELECT clubName, clubAcronym, REPLACE(clubName, ' ', '_') AS clubKey, clubId from Club", []);
-  let obj: any = {};
-  let data: any[] = [];
-  for (let club of clubs) {
-    obj[club.clubKey] = {};
-    obj[club.clubKey]["clubName"] = club.clubName;
-    obj[club.clubKey]["clubAcronym"] = club.clubAcronym;
-    const result: any = await show("SELECT COUNT(*) as count FROM Activity WHERE club_id = ? AND YEAR(activityStartDateIso) = ?", [
-      club.clubId,
-      year,
-    ]);
-
-    obj[club.clubKey]["count"] = result[0].count;
-    data.push(obj[club.clubKey]);
-    delete data[club.clubKey];
-  }
-  return data;
-}
-
-async function getPercentage(year: any) {
+async function getClubCount(year: any, semester: any) {
   const clubs: any = await show("SELECT clubName, clubAcronym, REPLACE(clubName, ' ', '_') AS clubKey, clubId from Club", []);
   let obj: any = {};
   let data: any[] = [];
@@ -65,8 +45,28 @@ async function getPercentage(year: any) {
     obj[club.clubKey]["clubName"] = club.clubName;
     obj[club.clubKey]["clubAcronym"] = club.clubAcronym;
     const result: any = await show(
-      `SELECT ROUND((COUNT(*)/(SELECT targetActivityNumber FROM TargetActivity WHERE club_id = ? AND targetActivityYear = '2024') * 100)) AS percentage FROM Activity WHERE club_id = ? AND YEAR(activityStartDateIso) = ?`,
-      [club.clubId, club.clubId, year]
+      "SELECT COUNT(*) as count FROM Activity WHERE club_id = ? AND YEAR(activityStartDateIso) = ? AND activitySemester = ?",
+      [club.clubId, year, semester]
+    );
+
+    obj[club.clubKey]["count"] = result[0].count;
+    data.push(obj[club.clubKey]);
+    delete data[club.clubKey];
+  }
+  return data;
+}
+
+async function getPercentage(year: any, semester: any) {
+  const clubs: any = await show("SELECT clubName, clubAcronym, REPLACE(clubName, ' ', '_') AS clubKey, clubId from Club", []);
+  let obj: any = {};
+  let data: any[] = [];
+  for (let club of clubs) {
+    obj[club.clubKey] = {};
+    obj[club.clubKey]["clubName"] = club.clubName;
+    obj[club.clubKey]["clubAcronym"] = club.clubAcronym;
+    const result: any = await show(
+      `SELECT ROUND((COUNT(*)/(SELECT targetActivityNumber FROM TargetActivity WHERE club_id = ? AND targetActivityYear = ? AND targetActivitySemester = ?) * 100)) AS percentage FROM Activity WHERE club_id = ? AND YEAR(activityStartDateIso) = ?  AND activitySemester = ?`,
+      [club.clubId, year, semester, club.clubId, year, semester]
     );
 
     obj[club.clubKey]["count"] = Number(result[0].percentage);
@@ -76,7 +76,7 @@ async function getPercentage(year: any) {
   return data;
 }
 
-async function getMonths(year: any) {
+async function getMonths(year: any, semester: any) {
   const clubs: any = await show("SELECT clubName, clubAcronym, REPLACE(clubName, ' ', '_') AS clubKey, clubId from Club", []);
   const categories: any = await show("SELECT categoryName, REPLACE(categoryName, ' ', '_') AS categoryKey, categoryId FROM Category", []);
   let obj: any = {};
@@ -88,8 +88,8 @@ async function getMonths(year: any) {
     obj[club.clubKey]["category"] = {};
     for (let category of categories) {
       const result: any = await show(
-        "SELECT MONTH(activityStartDateIso) AS months, COUNT(*) AS count FROM Activity WHERE club_id = ? AND  category_id = ? AND YEAR(activityStartDateIso) = ? GROUP BY MONTH(activityStartDateIso)",
-        [club.clubId, category.categoryId, year]
+        "SELECT MONTH(activityStartDateIso) AS months, COUNT(*) AS count FROM Activity WHERE club_id = ? AND  category_id = ? AND YEAR(activityStartDateIso) = ? AND activitySemester = ? GROUP BY MONTH(activityStartDateIso) ",
+        [club.clubId, category.categoryId, year, semester]
       );
 
       obj[club.clubKey]["category"][category.categoryName] = [];
@@ -113,13 +113,16 @@ async function getMonths(year: any) {
   return data;
 }
 
-async function clubsTargetActivity(year: any) {
+async function clubsTargetActivity(year: any, semester: any) {
   const obj: any = {};
   obj["hasActivity"] = [];
   obj["noActivity"] = [];
   const clubs: any = await show("SELECT clubId, clubName, clubAcronym FROM Club", []);
   for (let club of clubs) {
-    const res: any = await show("SELECT COUNT(*) as count FROM TargetActivity WHERE club_id = ? AND targetActivityYear = ?", [club.clubId, year]);
+    const res: any = await show(
+      "SELECT COUNT(*) as count FROM TargetActivity WHERE club_id = ? AND targetActivityYear = ? AND targetActivitySemester = ?",
+      [club.clubId, year, semester]
+    );
 
     if (res[0].count > 0) {
       obj["hasActivity"].push(club);
@@ -146,17 +149,17 @@ function yearGenerated() {
 
 router.get("/overview", async function (req, res) {
   //category-count, club-count, percentage, months
-  const { year } = req.query;
+  const { year, semester } = req.query;
   const data = {
-    countRef: await getClubCount(year),
-    percentageRef: await getPercentage(year),
-    clubActivityRef: await clubsTargetActivity(year),
+    countRef: await getClubCount(year, semester),
+    percentageRef: await getPercentage(year, semester),
+    clubActivityRef: await clubsTargetActivity(year, semester),
     calendarActivityRef: await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ${year}`,
+      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ${year} AND activitySemester = ${semester}`,
       []
     ),
     latest20ActivityRef: await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ${year} ORDER BY activityStartDateIso ASC LIMIT 20 OFFSET 0`,
+      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ${year} AND activitySemester = ${semester} ORDER BY activityStartDateIso ASC LIMIT 20 OFFSET 0`,
       []
     ),
     yearRef: yearGenerated(),
@@ -166,10 +169,10 @@ router.get("/overview", async function (req, res) {
 
 router.get("/clubs-organizatons", async function (req, res) {
   //category-count, club-count, percentage, months
-  const { year } = req.query;
+  const { year, semester } = req.query;
   const data = {
-    categoryRef: await getCategoryCount(year),
-    monthsRef: await getMonths(year),
+    categoryRef: await getCategoryCount(year, semester),
+    monthsRef: await getMonths(year, semester),
     clubsRef: await show("SELECT clubName, clubAcronym FROM Club", []),
     yearRef: yearGenerated(),
   };

@@ -118,8 +118,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="card h-[60vh] w-[93vw] p-12">
-    <h2 class="text-center text-lg font-medium">Total percentage in each club based on the target activity</h2>
+  <div class="card h-[60vh] w-[92vw] p-6">
+    <h2 class="text-center text-lg font-semibold"><slot></slot></h2>
     <canvas ref="chartCanvaPct"> </canvas>
   </div>
 </template>
