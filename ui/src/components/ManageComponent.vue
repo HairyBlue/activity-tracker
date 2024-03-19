@@ -85,7 +85,6 @@ function cleanForms() {
 // FETCH EVENT ************************************************
 function fetchData() {
   loading.value = true;
-  console.log(targetCard.value);
   $.ajax({
     url: `/api/${targetCard.value}`,
     method: 'GET',

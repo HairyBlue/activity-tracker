@@ -1,10 +1,16 @@
+<script setup lang="ts">
+import { userStore } from '../store/userStore';
+const user = userStore();
+
+</script>
+
 <template>
   <header>
     <div class="logo-header">
       <img src="/logo.png" alt="" />
       <span>Activity Tracker</span>
     </div>
-    <span>Logout</span>
+    <span @click="user.removeToken()">Logout</span>
   </header>
 </template>
 

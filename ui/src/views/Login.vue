@@ -27,7 +27,7 @@ function handleLogin() {
     })
       .done((data) => {
         if (data.token) {
-          localStorage.setItem('activity_tracker_presist', JSON.stringify({ user: { token: data.token } }));
+          localStorage.setItem('activity_tracker_presist', JSON.stringify({ user: { token: data.token, level: data.level } }));
         }
         if (data.message == 'success') {
           setTimeout(() => {
@@ -66,13 +66,7 @@ function handleLogin() {
         </section>
         <ButtonWarn class="mx-auto mt-4 w-3/4 p-2" @click="handleLogin">Sign in to your account</ButtonWarn>
         <span>Forgot your password?</span>
-        <span
-          v-if="status"
-          :class="
-            status.type == 'success' ? 'text-green-400' : status.type == 'loading' ? 'text-black' : 'text-red-400'
-          ">
-          {{ status.message }}</span
-        >
+        <span v-if="status" :class="status.type == 'success' ? 'text-green-400' : status.type == 'loading' ? 'text-black' : 'text-red-400'"> {{ status.message }}</span>
       </div>
     </div>
     <div class="login-fade"></div>

@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { userStore } from '../store/userStore';
+
+const user = userStore();
 import dashboardSvg from '../assets/svg/overview.svg';
 import activitySvg from '../assets/svg/activity.svg';
 import clubsSvg from '../assets/svg/clubs.svg';
 import manageSvg from '../assets/svg/manage.svg';
+import userSvg from "../assets/svg/user.svg"
 </script>
 
 <template>
@@ -19,6 +23,9 @@ import manageSvg from '../assets/svg/manage.svg';
       </router-link>
       <router-link to="/manage">
         <div aria-label="Manage" class="tooltip" aria-expanded="false"><img :src="manageSvg" alt="manage" /></div>
+      </router-link>
+      <router-link v-if="user.getLevel() !== 'STAFF'" to="/user">
+        <div aria-label="User Management" class="tooltip" aria-expanded="false"><img :src="userSvg" alt="manage" /></div>
       </router-link>
     </nav>
   </aside>
