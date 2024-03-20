@@ -1,7 +1,6 @@
 <script setup lang="ts">
 // deps
 import { ref, onMounted, watch } from 'vue';
-import router from '../router';
 import $ from 'jquery';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -201,7 +200,7 @@ onMounted(() => {
       <section class="card mt-2 p-4 lg:w-1/2">
         <DoughnutChart v-if="pieCharData.length > 0" :dataset="pieCharData" />
       </section>
-      <section class="card mt-2 overflow-y-auto p-4">
+      <section class="card mt-2 overflow-y-auto p-4 lg:w-1/4">
         <span>Clubs and Organizations have target activity</span>
         <div class="overflow-y-auto">
           <table class="w-full table-auto">
@@ -220,7 +219,7 @@ onMounted(() => {
           </table>
         </div>
       </section>
-      <section class="card mt-2 overflow-y-auto p-4">
+      <section class="card mt-2 overflow-y-auto p-4 lg:w-1/4">
         <span>Clubs and Organizations dont have target activity</span>
         <div class="overflow-y-auto">
           <table class="w-full table-auto">

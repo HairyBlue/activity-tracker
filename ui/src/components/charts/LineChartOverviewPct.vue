@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { onMounted, ref, onUnmounted, watch } from 'vue';
+import { onMounted, ref, onUnmounted } from 'vue';
 
 const chartCanvaPct = ref<any>();
 const props = defineProps(['label', 'dataset', 'type']);
@@ -70,7 +70,7 @@ function createChart() {
       },
       plugins: {
         datalabels: {
-          formatter: function (value: any, ctx: any) {
+          formatter: function (value: any) {
             // Format the value with a percent symbol
             return value + ' %';
           },
@@ -118,7 +118,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="card h-[60vh] w-[92vw] p-6">
+  <div class="card h-[60vh] w-[92vw] p-12">
     <h2 class="text-center text-lg font-semibold"><slot></slot></h2>
     <canvas ref="chartCanvaPct"> </canvas>
   </div>

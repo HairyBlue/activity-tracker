@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Chart, { ChartTypeRegistry } from 'chart.js/auto';
+import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { onMounted, ref, onUnmounted, watch } from 'vue';
+import { onMounted, ref, onUnmounted } from 'vue';
 
 const chartCanvaCt = ref<any>();
 const props = defineProps(['label', 'dataset', 'type']);
@@ -114,7 +114,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="card h-[60vh] w-[92vw] p-6">
+  <div class="card h-[60vh] w-[92vw] p-12">
     <h2 class="text-center text-lg font-semibold"><slot></slot></h2>
     <canvas ref="chartCanvaCt"> </canvas>
   </div>

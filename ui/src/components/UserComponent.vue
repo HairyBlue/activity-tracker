@@ -67,7 +67,7 @@ function fetchData() {
       xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
     },
   }).then((data) => {
-    console.log(data);
+
     rows.value = data.users;
     myId.value = data.myaccount.userId;
     myUsername.value = data.myaccount.username;
@@ -227,7 +227,6 @@ watch([selectionRoleWM, selectionRoleAD], ([selectionRoleWMNew, selectionRoleADN
 onMounted(() => {
   fetchData();
   window.addEventListener('resize', checkWindowSize);
-  console.log(user.getLevel());
 });
 
 onUnmounted(() => {

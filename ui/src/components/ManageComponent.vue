@@ -422,7 +422,7 @@ onUnmounted(() => {
                   <th class="text-start">acronym</th>
                 </tr>
               </thead>
-              <tbody class="text-[10px]">
+              <tbody class="text-[12px]">
                 <tr v-if="targetCard == 'target-activity'" v-for="(row, idx) in activityFormData.clubNoAct" :class="idx % 2 == 1 ? 'grayed-out' : ''">
                   <td>{{ row.clubName }}</td>
                   <td>{{ row.clubAcronym }}</td>
@@ -461,7 +461,7 @@ onUnmounted(() => {
                 <th class="text-start">action</th>
               </tr>
             </thead>
-            <tbody class="text-[10px]">
+            <tbody class="text-[12px]">
               <!--  -->
               <!--  -->
               <tr v-if="targetCard == 'category'" v-for="(row, idx) in rows" :class="idx % 2 == 1 ? 'grayed-out' : ''">

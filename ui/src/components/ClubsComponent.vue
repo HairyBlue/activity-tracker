@@ -1,7 +1,6 @@
 <script setup lang="ts">
 // deps
 import { ref, onMounted, watch } from 'vue';
-import router from '../router';
 import $ from 'jquery';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';

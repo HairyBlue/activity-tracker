@@ -100,7 +100,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="m-auto h-[58vh] w-[42vw]">
-    <canvas ref="chartCanva"> </canvas>
+  <div class="m-auto w-[52vw] max-md:w-full lg:w-[45vw]">
+    <canvas ref="chartCanva" style="height: 420px"> </canvas>
   </div>
 </template>

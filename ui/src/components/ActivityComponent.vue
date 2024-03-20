@@ -73,17 +73,17 @@ function editRowAction(data: any, active: boolean) {
   activitySemester.value = data.activitySemester;
 }
 
-function deleteRowAction(data: any, active: boolean) {
-  editActive.value = active;
+// function deleteRowAction(data: any, active: boolean) {
+//   editActive.value = active;
 
-  activityId.value = data.activityId;
-  club_id.value = data.club_id;
-  category_id.value = data.category_id;
-  activityName.value = data.activityName;
-  activityNotes.value = data.activityNotes;
-  activityStartDateIso.value = data.activityStartDateIso;
-  activityEndDateIso.value = data.activityEndDateIso;
-}
+//   activityId.value = data.activityId;
+//   club_id.value = data.club_id;
+//   category_id.value = data.category_id;
+//   activityName.value = data.activityName;
+//   activityNotes.value = data.activityNotes;
+//   activityStartDateIso.value = data.activityStartDateIso;
+//   activityEndDateIso.value = data.activityEndDateIso;
+// }
 
 function cleanForm() {
   club_id.value = null;
