@@ -59,7 +59,7 @@ router.get("/activity", async function (req, res) {
     );
   } else if (categoryFilter !== "") {
     data["result"] = await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE category_id = ? AND YEAR(activityStartDateIso) = ${year} AND activitySemester = ${semester} ORDER BY activityStartDateIso_at ${orderBy} LIMIT ${page_size} OFFSET ${offSet} `,
+      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE category_id = ? AND YEAR(activityStartDateIso) = ${year} AND activitySemester = ${semester} ORDER BY activityStartDateIso ${orderBy} LIMIT ${page_size} OFFSET ${offSet}`,
       [Number(categoryFilter)]
     );
   }
