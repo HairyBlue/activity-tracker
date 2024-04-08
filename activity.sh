@@ -25,9 +25,11 @@ function buildServer(){
     rm -rf dist
     npm run build
 
-    if [[ -f ".env" ]]; then
-        cp .env ./dist
+    if [[ ! -f ".env" ]]; then
+        exitf "No .env found on the server. Need to add"
     fi
+
+    cp .env ./dist
     cp -r ./src/settings ./dist
 
     npm run test
