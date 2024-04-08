@@ -3,11 +3,16 @@ import * as http from "http";
 import * as logging from "./logger";
 import createRoutes from "./createRoutes";
 import { initDiscord } from "./discord";
+import { Settings } from "luxon"
+import * as settings from "./settings" 
+
 const logger = logging.wichFileToLog("app");
 const app = createRoutes();
 const server = http.createServer(app);
+Settings.defaultZone = "Asia/Manila"
 
 initDiscord();
+setInterval((logging.zipTheLogs), settings.defaults.zipInterval)
 
 process
   .on("unhandledRejection", (reason, p) => {

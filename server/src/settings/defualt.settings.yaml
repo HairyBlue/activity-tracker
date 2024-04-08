@@ -24,3 +24,4 @@ settings:
       password: 'root'
       name: 'activity_tracker'
       connectionLimit: 20
+  zipInterval: 3600000
