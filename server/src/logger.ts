@@ -73,7 +73,7 @@ function zipTheLogs() {
         const filePath = `${logFolder}/${file}`;
         const content = fs.readFileSync(filePath, "utf8");
         zip.file(file, content);
-        zip.generateAsync({ type: "nodebuffer" }).then((content) => {
+        zip.generateAsync({ type: "nodebuffer" }).then((content: any) => {
           fs.writeFileSync(`${logFolder}/older_logs_${DateTime.now().toFormat('yyyy-MM-dd')}.zip`, content);
           fs.unlinkSync(filePath)
         });
