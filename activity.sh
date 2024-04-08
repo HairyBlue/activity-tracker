@@ -24,6 +24,12 @@ function buildServer(){
     npm install
     rm -rf dist
     npm run build
+
+    if [[ -f ".env" ]]; then
+        cp .env ./dist
+    fi
+    cp -r ./src/settings ./dist
+
     npm run test
 }
 
