@@ -12,7 +12,7 @@ const server = http.createServer(app);
 Settings.defaultZone = "Asia/Manila"
 
 initDiscord();
-setTimeout((logging.zipTheLogs), settings.defaults.zipInterval)
+setInterval((logging.zipTheLogs), settings.defaults.zipInterval)
 
 process
   .on("unhandledRejection", (reason, p) => {
