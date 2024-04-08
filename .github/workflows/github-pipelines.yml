@@ -23,4 +23,7 @@ jobs:
           node-version: ${{matrix.node-version}}
              
       - name: Run build script
-        run: ./activity.sh build
+        run: |
+          chmod +x ./activity.sh
+          ./activity.sh
+        shell: bash
