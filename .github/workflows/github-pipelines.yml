@@ -24,6 +24,6 @@ jobs:
               
       - name: Run build script
         run: |
-          chmod +x ./activity.sh
+          chmod +wx ./activity.sh
           ./activity.sh build
         shell: bash
