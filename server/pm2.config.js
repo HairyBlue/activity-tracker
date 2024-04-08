@@ -3,7 +3,7 @@ module.exports = {
   apps: [
     {
       name: "server",
-      script: path.join(__dirname, "dist/app.js"),
+      script: path.join(__dirname + "/dist" , "app.js"),
       exec_mode: "cluster",
       max_memory_restart: "5G",
       watch_delay: 3000,
