@@ -1,3 +1,4 @@
+import { connection } from "../../db/dbcon";
 
 type Club = {
   name: string;
@@ -180,3 +181,31 @@ export const clubs: Club[] = [
   },
 ];
 
+async function seedCategory() {
+  try {
+    for (let category of categories) {
+      (await connection).query(`INSERT INTO Category (categoryName) value ('${category}')`);
+    }
+  } catch (e) {
+    console.log(e);
+  } finally {
+    console.log("Seed Category Success");
+    // (await connection).end();
+  }
+}
+
+async function seedClub() {
+  try {
+    for (let club of clubs) {
+      (await connection).query(`INSERT INTO Club (clubName, clubAcronym) values ('${club.name}', '${club.acronym}')`);
+    }
+  } catch (e) {
+    console.log(e);
+  } finally {
+    console.log("Seed Club Success");
+    (await connection).end();
+  }
+}
+
+seedCategory()
+seedClub()

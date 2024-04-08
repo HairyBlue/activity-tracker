@@ -52,7 +52,7 @@ function start(){
 
 
 if [[ "$#" -eq 0 ]]; then
-    exitf "No arguments found do '-help'"
+    exitf "No arguments found. Do '-help'"
 fi
 
 if [[ "$name" == "build" ]]; then
