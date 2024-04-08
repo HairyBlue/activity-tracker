@@ -29,6 +29,9 @@ const clubNoAct = ref<Array<any>>([]);
 const latest20Activity = ref<Array<any>>([]);
 
 const semester = ref<'1' | '2'>('1');
+
+const fileName = ref<string>(`Clubs, Organizations And Colleges Activities For Second Semester SY ${year.value}-${Number(year.value) + 1}`)
+
 // Be carefull on this as condition depends on string
 
 function chartLineDataCt(data: any[]) {
@@ -117,6 +120,15 @@ function downloadPdf() {
   });
 }
 
+function exportExcel() {
+    const link = document.createElement('a');
+    link.href =  `/excel-export?year=${year.value}&semester=${semester.value}&filename=${fileName.value}`
+    link.setAttribute("_target", "blank")
+
+    link.click();
+    document.body.removeChild(link);
+}
+
 function clearChartData() {
   labelsCt.value = [];
   labelsPct.value = [];
@@ -179,6 +191,7 @@ onMounted(() => {
           </select>
         </div>
         <ButtonSubmit v-if="labelsCt.length > 0 && labelsPct.length > 0" @click="downloadPdf" class="h-[30px] border px-8 py-1">Download PDF</ButtonSubmit>
+        <ButtonSubmit v-if="labelsCt.length > 0 && labelsPct.length > 0" @click="exportExcel" class="h-[30px] border px-8 py-1">Download Excel</ButtonSubmit>
       </div>
     </div>
     <!--  -->
