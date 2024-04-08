@@ -82,5 +82,21 @@ function zipTheLogs() {
   });
 }
 
+function logList() {
+  const files = fs.readdirSync(logFolder);
+  const fileList: string[] = []
 
-export { wichFileToLog, zipTheLogs };
+  files.forEach(file => {
+    fileList.push(file)
+  })
+ 
+  return fileList
+}
+
+function readLog(file: string) {
+  const filePath = `${logFolder}/${file}`;
+
+  return fs.readFileSync(filePath, "utf8");
+}
+
+export { wichFileToLog, zipTheLogs, logList, readLog };
