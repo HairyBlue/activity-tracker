@@ -6,3 +6,4 @@ letsencrypt
 *.sql
 logs
 logs/**
+bash.*
