@@ -21,11 +21,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{matrix.node-version}}
+      - name: Change directory to server
+        run: cd server       
       - name: Install dependencies for server
-        run: npm ci --prefix server
-
+        run: npm ci
       # - name: Build the server
       #   run: npm run build --prefix server --if-present
-
       - name: Test the server
-        run: npm test --prefix server
+        run: npm test

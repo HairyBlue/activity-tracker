@@ -7,24 +7,28 @@ Main purpose is to track activities on clubs and organization for schools
 
 ## Project Setup
 
-### Installation
-
+### Server
 ```bash
-npm install --prefix server
-npm install --prefix ui
+cd server
+npm install
+npm run build
+cd .. # return to root
 ```
 
-### Build
-
+### UI
 ```bash
-npm run build --prefix server
-npm run build --prefix ui
+cd ui
+npm install
+npm run build
+cd .. # return to root
 ```
 
 ### Test
 
 ```bash
-npm test --prefix server
+cd server 
+npm test
+cd .. # return to root
 ```
 
 ### Usage
