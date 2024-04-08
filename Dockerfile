@@ -4,16 +4,10 @@ WORKDIR /app/activity-tracker
 
 COPY . .
 
-RUN cd ui && npm install && npm run build
+RUN chmod +x activity.sh
 
-RUN cd server && npm install && npm run build
-
-# Run tests for UI and server
-# RUN cd ui && npm test
-RUN cd server && npm test
-
-COPY ui/dist ./server/dist/public
+RUN activity.sh build
 
 EXPOSE 3500
 
-CMD ["node", "./server/dist/app.js"]
+CMD ["activity.sh", "start"]
