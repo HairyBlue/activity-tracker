@@ -32,8 +32,8 @@ npm test --prefix server
 ```bash
 rm -rf server/dist/public
 cp -r ui/dist server/dist/public
-cd server
-node dist/app.js
+cd server/dist
+node app.js
 ```
 
 ## Using with PM2 and PM2 Windows Service
