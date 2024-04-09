@@ -9,6 +9,8 @@ import * as club from "./manage/club";
 import * as category from "./manage/category";
 import * as targetActivity from "./manage/targetActivity";
 import * as clubOrg from "./clubsandorg";
+import * as exportExcel from "./utils/exportExcel"
+
 function createRoutes() {
   const app = express();
   const verifyClient = middleware.verifyClient;
@@ -25,6 +27,7 @@ function createRoutes() {
   });
 
   // * ROUTES
+  app.use("/", exportExcel.router)
   app.use("/api", loginroute.router);
 
   app.use("/api", verifyClient, clientroute.router);
