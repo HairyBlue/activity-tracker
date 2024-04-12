@@ -131,8 +131,10 @@ router.patch("/user", async function (req, res) {
   if (checkUsername.trim() === "" || checkEmail.trim() === "") {
     logger.warn(`${user} is failed to update account`);
     res.status(400).json({ message: "Please complete the form" });
+    return
   } else if (!validateEmail(email)) {
     res.status(400).json({ message: "Invalid email address" });
+    return
   } else {
     if (result.length > 0) {
       await update("UPDATE Users SET username = ?, email = ? WHERE userId = ?", [username, email, result[0].userId]);

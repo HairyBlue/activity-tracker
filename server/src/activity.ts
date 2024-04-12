@@ -75,9 +75,11 @@ router.post("/activity", async function (req, res) {
   if (!club_id || !category_id || activityName == "") {
     logger.warn(`${user} is failed to post data in acitivity`);
     res.status(400).json({ message: "Please complete the form" });
+    return
   } else if (!displayDate) {
     logger.warn(`${user} is failed to input a date in acitivity`);
     res.status(400).json({ message: "Please select or change the date" });
+    return
   } else {
     await create(
       "INSERT INTO Activity (club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, activityDisplayDate, activitySemester) values (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -98,9 +100,11 @@ router.put("/activity", async function (req, res) {
   if (!club_id || !category_id || activityName == "") {
     logger.warn(`${user} is failed to post data in acitivity`);
     res.status(400).json({ message: "Please complete the form" });
+    return
   } else if (!displayDate) {
     logger.warn(`${user} is failed to input a date in acitivity`);
     res.status(400).json({ message: "Please select or change the date" });
+    return
   } else {
     await update(
       "UPDATE Activity SET club_id = ?, category_id = ?, activityName = ?, activityNotes = ?, activityStartDateIso = ?, activityEndDateIso = ?, activityDisplayDate = ?, activitySemester = ? WHERE activityId = ?",
