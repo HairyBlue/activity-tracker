@@ -19,9 +19,9 @@ function register() {
   router.post("/club", async function (req, res) {
     const user = (req as GetUserRequest).user;
     const { clubName, clubAcronym } = req.body;
-    if (clubName === "" || clubAcronym === "") {
+    if (clubName === "") {
       logger.warn(`${user} is failed to post data in club`);
-      res.status(400).json({ message: "Please complete the form" });
+      res.status(400).json({ message: "Club or organizatons name should not be empty" });
       return;
     }
     await create("INSERT INTO Club (clubName, clubAcronym) values (?, ?)", [clubName, clubAcronym]);
