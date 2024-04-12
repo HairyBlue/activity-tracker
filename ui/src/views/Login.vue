@@ -45,6 +45,10 @@ function handleLogin() {
       });
   }
 }
+
+window.addEventListener("keypress", function (event: KeyboardEvent) {
+  if(event.key == "Enter") handleLogin()
+})
 </script>
 
 <template>
@@ -64,7 +68,7 @@ function handleLogin() {
           <label for="password">Password</label>
           <input id="password" type="password" autocomplete="off" class="h-8" required v-model="password" />
         </section>
-        <ButtonWarn class="mx-auto mt-4 w-3/4 p-2" @click="handleLogin">Sign in to your account</ButtonWarn>
+        <ButtonWarn id="login-action" class="mx-auto mt-8 w-3/4 p-2" @click="handleLogin">Sign in to your account</ButtonWarn>
         <!-- <span>Forgot your password?</span> -->
         <span v-if="status" :class="status.type == 'success' ? 'text-green-400' : status.type == 'loading' ? 'text-black' : 'text-red-400'"> {{ status.message }}</span>
       </div>
