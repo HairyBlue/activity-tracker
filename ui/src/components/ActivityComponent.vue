@@ -130,7 +130,7 @@ function submit() {
     data: JSON.stringify({
       club_id: club_id.value,
       category_id: category_id.value,
-      activityName: activityName.value,
+      activityName: activityName.value.trim(),
       activityNotes: activityNotes.value,
       activityStartDateIso: activityStartDateIso.value,
       activityEndDateIso: activityEndDateIso.value,
@@ -165,7 +165,7 @@ function edit() {
       activityId: activityId.value,
       club_id: club_id.value,
       category_id: category_id.value,
-      activityName: activityName.value,
+      activityName: activityName.value.trim(),
       activityNotes: activityNotes.value,
       activityStartDateIso: activityStartDateIso.value,
       activityEndDateIso: activityEndDateIso.value,

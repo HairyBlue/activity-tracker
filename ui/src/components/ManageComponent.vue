@@ -128,11 +128,11 @@ function submit() {
     data: JSON.stringify(
       (function toSubmitData() {
         if (targetCard.value == 'category') {
-          return { categoryName: categoryName.value };
+          return { categoryName: categoryName.value.trim() };
         } else if (targetCard.value == 'club') {
           return {
-            clubName: clubName.value,
-            clubAcronym: clubAcronym.value,
+            clubName: clubName.value.trim(),
+            clubAcronym: clubAcronym.value.trim(),
           };
         } else if (targetCard.value == 'target-activity') {
           return {
@@ -177,12 +177,12 @@ function edit(active: boolean) {
     data: JSON.stringify(
       (function toEditData() {
         if (targetCard.value == 'category') {
-          return { categoryId: categoryId.value, categoryName: categoryName.value };
+          return { categoryId: categoryId.value, categoryName: categoryName.value.trim() };
         } else if (targetCard.value == 'club') {
           return {
             clubId: clubId.value,
-            clubName: clubName.value,
-            clubAcronym: clubAcronym.value,
+            clubName: clubName.value.trim(),
+            clubAcronym: clubAcronym.value.trim(),
           };
         } else if (targetCard.value == 'target-activity') {
           return {
