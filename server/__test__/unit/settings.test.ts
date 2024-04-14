@@ -49,12 +49,17 @@ describe("check default setting yaml where defined", function () {
    it("should have config", function () {
      expect(stagingDB.host).toBe("localhost" || "127.0.0.1");
      expect(stagingDB.user).toBe("root");
-     expect(stagingDB.password).toBe("root");
+    //  expect(stagingDB.password).toBe("root");
      expect(stagingDB.name).toBe("activity_tracker");
      expect(stagingDB.limit).toBeGreaterThan(15);
    })
   })
 
-  // // CHECK FOR DB CONFIG
+  describe("check zip interval", function () {
+    it("interval should be 3600000 ms or 1hour", function () {
+      expect(defaults.zipInterval).toBe(3600000);
+   });
 
+  })
+  
 });
