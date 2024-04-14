@@ -28,6 +28,10 @@ if [[ "$#" -eq 0 ]]; then
     exitf "No arguments found. Do '-help'"
 fi
 
+if [[ "$1" == "-help" ]]; then
+    printf "$text"
+fi
+
 if [[ "$env" == "production" ]]; then
     cd "./server" #need to cd due the dependencies
     if [[ "$1" == "migrate" ]]; then
@@ -59,8 +63,6 @@ elif [[ "$env" == "staging" || "$env" == "development" ]]; then
     fi
 
     cd "$current_dir"
-elif [[ "$1" == "-help" ]]; then
-    printf "$text"
 else
     exitf "no env found"
 fi
