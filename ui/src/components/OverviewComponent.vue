@@ -6,15 +6,23 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 //comp
 import { userStore } from '../store/userStore';
+import { userPreference } from "../store/userPref"
 
 import LineChartOverviewCt from './charts/LineChartOverviewCt.vue';
 import LineChartOverviewPct from './charts/LineChartOverviewPct.vue';
 import DoughnutChart from './charts/Doughnut Chart.vue';
 import ButtonSubmit from './globals/buttons/ButtonSubmit.vue';
 const user = userStore();
-const chartType = ref<'bar' | 'line'>('line');
-const countOrPct = ref<'count' | 'percentage'>('count');
-const year = ref<any>(new Date().getFullYear());
+const userPref = userPreference()
+
+const chartType = ref<'bar' | 'line'>(userPref.getValue("overview.chart", 'line'));
+
+const countOrPct = ref<'count' | 'percentage'>(userPref.getValue("overview.countOrPct", 'count'));
+
+const year = ref<any>(userPref.getValue("overview.year", new Date().getFullYear()));
+
+const semester = ref<'1' | '2'>(userPref.getValue("overview.semester", '1'));
+  
 const years = ref<Array<string>>([]);
 
 const labelsCt = ref<Array<string>>([]);
@@ -28,7 +36,6 @@ const clubHasAct = ref<Array<any>>([]);
 const clubNoAct = ref<Array<any>>([]);
 const latest20Activity = ref<Array<any>>([]);
 
-const semester = ref<'1' | '2'>('1');
 
 const fileName = ref<string>(`Clubs, Organizations And Colleges Activities For Second Semester SY ${year.value}-${Number(year.value) + 1}`)
 
@@ -137,18 +144,24 @@ function clearChartData() {
   pieCharData.value = [];
 }
 
-watch([chartType, year, semester], ([newType, newYear, newSemester], [oldType, oldYear, oldSemester]) => {
+watch([chartType, year, semester, countOrPct], ([newType, newYear, newSemester, countOrPctNew], [oldType, oldYear, oldSemester, countOrPctOld]) => {
   if (newType !== oldType) {
     clearChartData();
     fetchData();
+    userPref.setValue("overview.chart", newType)
   }
   if (newYear !== oldYear) {
     clearChartData();
     fetchData();
+    userPref.setValue("overview.year", newYear)
   }
   if (newSemester !== oldSemester) {
     clearChartData();
     fetchData();
+    userPref.setValue("overview.semester", newSemester)
+  }
+  if (countOrPctNew != countOrPctOld) {
+    userPref.setValue("overview.countOrPct", countOrPctNew)
   }
 });
 

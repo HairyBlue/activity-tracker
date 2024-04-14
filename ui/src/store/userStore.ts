@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import router from '../router';
 
-export const userStore = defineStore('userSore', function () {
+export const userStore = defineStore('userStore', function () {
   function isLocalCred(): any {
     return localStorage.getItem('activity_tracker_presist');
   }

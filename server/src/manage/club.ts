@@ -1,6 +1,7 @@
 import * as express from "express";
 import * as logging from "../logger";
 import { show, create, update, destroy } from "../db/dbcon";
+import { handleMod } from "../cachedData";
 interface GetUserRequest extends express.Request {
   user?: string;
 }
@@ -26,6 +27,8 @@ function register() {
     }
     await create("INSERT INTO Club (clubName, clubAcronym) values (?, ?)", [clubName, clubAcronym]);
     logger.info(`${user} is posting data in club`);
+
+    handleMod()
     res.json({ message: "success" });
   });
 
@@ -41,6 +44,8 @@ function register() {
     await update("UPDATE Club SET clubName = ?, clubAcronym = ? WHERE clubId = ?", [clubName, clubAcronym, clubId]);
 
     logger.info(`${user} is updating data in club`);
+
+    handleMod()
     res.json({ message: "success" });
   });
 
@@ -52,6 +57,8 @@ function register() {
     await destroy("DELETE FROM Club WHERE clubId = ?", [clubId]);
 
     logger.info(`club was delete by ${user}`);
+
+    handleMod()
     res.json({ message: "success" });
   });
   return router;

@@ -9,12 +9,18 @@ import { userStore } from '../store/userStore';
 import BarChart from './charts/BarChart.vue';
 import LineChart from './charts/LineChart.vue';
 import ButtonSubmit from './globals/buttons/ButtonSubmit.vue';
+import { userPreference } from '../store/userPref';
 const user = userStore();
+const userPref = userPreference();
 
-const year = ref<any>(new Date().getFullYear());
+const year = ref<any>(userPref.getValue("club.year", new Date().getFullYear()));
+
+const semester = ref<'1' | '2'>(userPref.getValue("club.semester", '1'));
+
+const isClick = ref<number>(0);
+
 const clubKey = ref<string>('');
 const clubs = ref<Array<any>>([]);
-
 const categoryLabels = ref<Array<string>>([]);
 const categoryDatasets = ref<Array<number>>([]);
 // const monthsLabels = ref<Array<Object>>([]);
@@ -22,9 +28,6 @@ const categoryDatasets = ref<Array<number>>([]);
 const monthsData = ref<Array<any>>([]);
 const years = ref<Array<string>>([]);
 
-const isClick = ref<number>(0);
-
-const semester = ref<'1' | '2'>('1');
 function chartCategoryRef(categories: any[]) {
   for (let c of categories) {
     if (clubKey.value == `${c.clubName}-${c.clubAcronym}`) {
@@ -121,10 +124,12 @@ watch([year, semester], ([yearNew, newSemester], [yearOld, oldSemester]) => {
   if (yearNew !== yearOld) {
     resetData();
     fetchData();
+    userPref.setValue("club.year", yearNew)
   }
   if (newSemester !== oldSemester) {
     resetData();
     fetchData();
+    userPref.setValue("club.semester", newSemester)
   }
 });
 
