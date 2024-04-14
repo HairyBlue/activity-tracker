@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - "tickets/*"
+      - "develop/*"
       - "features/*"
 
 jobs:
