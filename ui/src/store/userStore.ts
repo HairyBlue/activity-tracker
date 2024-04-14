@@ -28,6 +28,7 @@ export const userStore = defineStore('userStore', function () {
   }
   function removeToken() {
     localStorage.removeItem('activity_tracker_presist');
+    localStorage.removeItem('activity_tracker_pref')
     router.push('/');
     return;
   }
