@@ -31,7 +31,6 @@ export const userPreference = defineStore('userPreference', function () {
       
         if (tempRef[root]) {
             if (tempRef[root][child]) {
-                console.log(tempRef[root][child])
                 return tempRef[root][child]
             }   
         }
