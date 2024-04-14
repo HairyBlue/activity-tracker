@@ -29,7 +29,7 @@ server.listen(3500, "0.0.0.0", () => {
   console.log("server is running");
 });
 
-logger.info(`service runs on ${process.env.NODE_ENV} development`)
+logger.info(`service runs on ${process.env.NODE_ENV} environment`)
 // TODO: Implement this feature
 // !: IMPORTANT
 // ?: ASK
