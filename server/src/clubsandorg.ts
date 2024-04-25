@@ -2,6 +2,7 @@ import * as express from "express";
 import * as logging from "./logger";
 import { show, create, update, destroy } from "./db/dbcon";
 import { validateDates } from "./helpers/formatAndValidation";
+import { returnCached, unCached, cached } from "./cachedData";
 interface GetUserRequest extends express.Request {
   user?: string;
 }
@@ -150,32 +151,50 @@ function yearGenerated() {
 router.get("/overview", async function (req, res) {
   //category-count, club-count, percentage, months
   const { year, semester } = req.query;
-  const data = {
-    countRef: await getClubCount(year, semester),
-    percentageRef: await getPercentage(year, semester),
-    clubActivityRef: await clubsTargetActivity(year, semester),
-    calendarActivityRef: await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ${year} AND activitySemester = ${semester}`,
-      []
-    ),
-    latest20ActivityRef: await show(
-      `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ${year} AND activitySemester = ${semester} ORDER BY activityStartDateIso ASC LIMIT 20 OFFSET 0`,
-      []
-    ),
-    yearRef: yearGenerated(),
-  };
-  res.json({ result: data });
+
+  if (unCached("overview", req.query)) {
+
+    const data = {
+      countRef: await getClubCount(year, semester),
+      percentageRef: await getPercentage(year, semester),
+      clubActivityRef: await clubsTargetActivity(year, semester),
+      calendarActivityRef: await show(
+        `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ${year} AND activitySemester = ${semester}`,
+        []
+      ),
+      latest20ActivityRef: await show(
+        `SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ${year} AND activitySemester = ${semester} ORDER BY activityStartDateIso ASC LIMIT 20 OFFSET 0`,
+        []
+      ),
+      yearRef: yearGenerated(),
+    };
+
+    cached("overview", data, req.query)
+    res.json({ result: data });
+
+  } else {
+    res.json({ result: returnCached("overview") })
+  }
+
 });
 
 router.get("/clubs-organizatons", async function (req, res) {
   //category-count, club-count, percentage, months
   const { year, semester } = req.query;
-  const data = {
-    categoryRef: await getCategoryCount(year, semester),
-    monthsRef: await getMonths(year, semester),
-    clubsRef: await show("SELECT clubName, clubAcronym FROM Club", []),
-    yearRef: yearGenerated(),
-  };
-  res.json({ result: data });
+  if (unCached("clubs", req.query)) {
+
+    const data = {
+      categoryRef: await getCategoryCount(year, semester),
+      monthsRef: await getMonths(year, semester),
+      clubsRef: await show("SELECT clubName, clubAcronym FROM Club", []),
+      yearRef: yearGenerated(),
+    };
+
+    cached("clubs", data, req.query)
+    res.json({ result: data });
+
+  } else {
+    res.json({ result: returnCached("clubs") })
+  }
 });
 export { router };

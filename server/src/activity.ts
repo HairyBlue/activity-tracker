@@ -2,6 +2,7 @@ import * as express from "express";
 import * as logging from "./logger";
 import { show, create, update, destroy } from "./db/dbcon";
 import { validateDates } from "./helpers/formatAndValidation";
+import { handleMod } from "./cachedData";
 interface GetUserRequest extends express.Request {
   user?: string;
 }
@@ -63,7 +64,7 @@ router.get("/activity", async function (req, res) {
       [Number(categoryFilter)]
     );
   }
-
+  
   res.json(data);
 });
 
@@ -84,6 +85,8 @@ router.post("/activity", async function (req, res) {
       [club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, displayDate, activitySemester]
     );
     logger.info(`activity was added by ${user}`);
+
+    handleMod()
     res.json({ message: "success" });
   }
 
@@ -91,7 +94,6 @@ router.post("/activity", async function (req, res) {
 
 router.put("/activity", async function (req, res) {
   const user = (req as GetUserRequest).user;
-  console.log(req.body);
   const { activityId, club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, activitySemester } = req.body;
   const displayDate = validateDates(activityStartDateIso, activityEndDateIso);
 
@@ -107,6 +109,8 @@ router.put("/activity", async function (req, res) {
       [club_id, category_id, activityName, activityNotes, activityStartDateIso, activityEndDateIso, displayDate, activitySemester, activityId]
     );
     logger.info(`activity was updated by ${user}`);
+
+    handleMod()
     res.json({ message: "success" });
   }
   
@@ -120,6 +124,8 @@ router.delete("/activity/:id", async function (req, res) {
   await destroy("DELETE FROM Activity WHERE activityId = ?", [activityId]);
 
   logger.info(`activity was delete by ${user}`);
+
+  handleMod()
   res.json({ message: "success" });
 });
 

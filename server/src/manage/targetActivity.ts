@@ -1,6 +1,7 @@
 import * as express from "express";
 import * as logging from "../logger";
 import { show, create, update, destroy } from "../db/dbcon";
+import { handleMod } from "../cachedData";
 interface GetUserRequest extends express.Request {
   user?: string;
 }
@@ -91,6 +92,8 @@ function register() {
         targetActivitySemester,
       ]);
       logger.info(`${user} is positng data in target activity`);
+
+      handleMod()
       res.json({ message: "success" });
     }
   });
@@ -127,6 +130,8 @@ function register() {
       );
 
       logger.info(`${user} is positng data in target activity`);
+
+      handleMod()
       res.json({ message: "success" });
     }
   });
@@ -139,6 +144,8 @@ function register() {
     await destroy("DELETE FROM TargetActivity WHERE targetActivityId = ?", [targetActivityId]);
 
     logger.info(`club was delete by ${user}`);
+
+    handleMod()
     res.json({ message: "success" });
   });
   return router;

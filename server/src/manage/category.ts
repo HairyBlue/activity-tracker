@@ -1,6 +1,7 @@
 import * as express from "express";
 import * as logging from "../logger";
 import { show, create, update, destroy } from "../db/dbcon";
+import { handleMod } from "../cachedData";
 interface GetUserRequest extends express.Request {
   user?: string;
 }
@@ -29,6 +30,8 @@ function register() {
     await create("INSERT INTO Category (categoryName) values (?)", [categoryName]);
 
     logger.info(`${user} is posting data in category`);
+
+    handleMod()
     res.json({ message: "success" });
   });
 
@@ -45,6 +48,8 @@ function register() {
     await update("UPDATE Category SET categoryName = ? WHERE categoryId = ?", [categoryName, categoryId]);
 
     logger.info(`${user} is updating data in category`);
+
+    handleMod()
     res.json({ message: "success" });
   });
 
@@ -56,6 +61,8 @@ function register() {
     await destroy("DELETE FROM Category WHERE categoryId = ?", [categoryId]);
 
     logger.info(`category was delete by ${user}`);
+
+    handleMod()
     res.json({ message: "success" });
   });
 
