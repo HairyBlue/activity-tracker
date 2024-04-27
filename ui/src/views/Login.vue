@@ -55,7 +55,7 @@ window.addEventListener("keypress", function (event: KeyboardEvent) {
 
 onBeforeMount(() => {
   if (user.getToken() != undefined) {
-    router.go(-1)
+    router.push("/overview")
   } else {
     showPage.value = true;
   }

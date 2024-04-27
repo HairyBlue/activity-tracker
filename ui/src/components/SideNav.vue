@@ -21,7 +21,7 @@ import userSvg from "../assets/svg/user.svg"
       <router-link to="/clubs-and-organizatons">
         <div aria-label="Clubs and Oraginzations" class="tooltip" aria-expanded="false"><img :src="clubsSvg" alt="clubs" /></div>
       </router-link>
-      <router-link to="/manage">
+      <router-link v-if="user.getLevel() !== 'STAFF'" to="/manage">
         <div aria-label="Manage" class="tooltip" aria-expanded="false"><img :src="manageSvg" alt="manage" /></div>
       </router-link>
       <router-link v-if="user.getLevel() !== 'STAFF'" to="/user">

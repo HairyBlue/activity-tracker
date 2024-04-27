@@ -33,6 +33,11 @@ const router = createRouter({
       name: 'user',
       component: () => import('../views/User.vue'),
     },
+    {
+      path: '/:notFound',
+      name: '404',
+      component: () => import('../views/404.vue'),
+    },
   ],
 });
 
