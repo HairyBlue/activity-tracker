@@ -151,6 +151,7 @@ function submit() {
       if (jqXHR.status == 400) {
         isError.value = true;
         errorMsg.value = jqXHR.responseJSON.message;
+        setTimeout(()=>{isError.value = false}, 10000)
       }
       if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
     });
@@ -187,6 +188,7 @@ function edit() {
       if (jqXHR.status == 400) {
         isError.value = true;
         errorMsg.value = jqXHR.responseJSON.message;
+        setTimeout(()=>{isError.value = false}, 10000)
       }
       if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
     });
@@ -302,7 +304,7 @@ onUnmounted(() => {
             <label>Clubs <span class="text-red-500">*</span></label>
             <select class="h-8" v-model="club_id" required>
               <option value="" selected disabled>Select clubs</option>
-              <option v-for="club in clubs" :value="club.clubId">{{ club.clubName }} ({{ club.clubAcronym }})</option>
+              <option v-for="club in clubs" :value="club.clubId">{{ club.clubName }} {{ club.clubAcronym != '' ? '(' + club.clubAcronym + ')' : '' }}</option>
             </select>
           </section>
           <section class="mt-4 flex flex-col text-start">
@@ -353,7 +355,7 @@ onUnmounted(() => {
           <div>
             <select class="w-full py-1 md:w-[150px]" v-model="clubFilter">
               <option value="" selected disabled>Club and Oraginzation</option>
-              <option v-for="club in clubs" :value="club.clubId">{{ club.clubName }} - {{ club.clubAcronym }}</option>
+              <option v-for="club in clubs" :value="club.clubId">{{ club.clubName }} {{ club.clubAcronym != '' ? '(' + club.clubAcronym + ')' : '' }}</option>
             </select>
           </div>
           <div>
@@ -386,8 +388,8 @@ onUnmounted(() => {
       <table class="w-full table-auto">
         <thead>
           <tr>
-            <th>Clubs</th>
-            <th>Activity</th>
+            <th>Club / Organization</th>
+            <th>Activity Name</th>
             <th>Category</th>
             <th>Date</th>
             <th></th>

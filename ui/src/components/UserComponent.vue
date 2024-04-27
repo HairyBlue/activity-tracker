@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // component
 import deleteImg from '../assets/svg/delete.svg';
-import editImg from '../assets/svg/edit.svg';
+// import editImg from '../assets/svg/edit.svg';
 
 import ButtonSubmit from './globals/buttons/ButtonSubmit.vue';
 import ButtonCancel from './globals/buttons/ButtonCancel.vue';
@@ -38,17 +38,19 @@ const myUsername = ref<string>('');
 const myEmail = ref<string>('');
 
 const clickAccount = ref<boolean>(false);
+
+let forceLogoutCount = ref<number>(0)
 function deletePopUpAction(data: any, active: boolean) {
   deletePopUp.value = active;
   popUpData.value = data;
 }
 
-function editRowAction(data: any, active: boolean) {
-  editActive.value = active;
+// function editRowAction(data: any, active: boolean) {
+//   editActive.value = active;
 
-  username.value = data.username;
-  email.value = data.email;
-}
+//   username.value = data.username;
+//   email.value = data.email;
+// }
 
 function cleanForm() {
   username.value = '';
@@ -109,38 +111,38 @@ function submit() {
     });
 }
 
-function edit() {
-  $.ajax({
-    url: '/api/user',
-    method: 'PATCH',
-    contentType: 'application/json',
-    data: JSON.stringify({
-      username: username.value,
-      email: email.value,
-    }),
-    beforeSend: function (xhr) {
-      xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
-    },
-  })
-    .done((data) => {
-      if (data.message == 'success') {
-        editActive.value = false;
-        cleanForm();
-        fetchData();
-      }
-    })
-    .fail((jqXHR) => {
-      if (jqXHR.status == 400) {
-        isError.value = true;
-        errorMsg.value = jqXHR.responseJSON.message;
+// function edit() {
+//   $.ajax({
+//     url: '/api/user',
+//     method: 'PATCH',
+//     contentType: 'application/json',
+//     data: JSON.stringify({
+//       username: username.value,
+//       email: email.value,
+//     }),
+//     beforeSend: function (xhr) {
+//       xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
+//     },
+//   })
+//     .done((data) => {
+//       if (data.message == 'success') {
+//         editActive.value = false;
+//         cleanForm();
+//         fetchData();
+//       }
+//     })
+//     .fail((jqXHR) => {
+//       if (jqXHR.status == 400) {
+//         isError.value = true;
+//         errorMsg.value = jqXHR.responseJSON.message;
 
-        setTimeout(() => {
-          isError.value = false;
-        }, 10000);
-      }
-      if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
-    });
-}
+//         setTimeout(() => {
+//           isError.value = false;
+//         }, 10000);
+//       }
+//       if (jqXHR.status == 401 || jqXHR.status == 403) router.push('/');
+//     });
+// }
 
 function editAccount() {
   $.ajax({
@@ -148,8 +150,8 @@ function editAccount() {
     method: 'PATCH',
     contentType: 'application/json',
     data: JSON.stringify({
-      username: username.value,
-      email: email.value,
+      username: myUsername.value,
+      email: myEmail.value,
     }),
     beforeSend: function (xhr) {
       xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
@@ -157,9 +159,16 @@ function editAccount() {
   })
     .done((data) => {
       if (data.message == 'success') {
-        editActive.value = false;
-        cleanForm();
-        fetchData();
+      forceLogoutCount.value = 5
+
+      let inter = setInterval(() => {
+        forceLogoutCount.value--;
+        if (forceLogoutCount.value == 0) {
+          clearInterval(inter)
+          router.push("/")
+        }
+      }, 1000)
+       
       }
     })
     .fail((jqXHR) => {
@@ -201,10 +210,10 @@ function destroy(userId: any) {
     });
 }
 
-function cancel() {
-  editActive.value = false;
-  cleanForm();
-}
+// function cancel() {
+//   editActive.value = false;
+//   cleanForm();
+// }
 function accountCancel() {
   clickAccount.value = false;
 }
@@ -269,9 +278,9 @@ onUnmounted(() => {
       </div>
 
       <div>
-        <ButtonSubmit @click="submit" v-if="!editActive" class="mt-8 p-2 max-lg:w-1/2 lg:w-1/4">Add activity</ButtonSubmit>
-        <ButtonSubmit @click="edit" v-if="editActive" class="mr-1 mt-8 p-2 max-lg:w-1/2 lg:w-1/4">Edit activity</ButtonSubmit>
-        <ButtonCancel @click="cancel" v-if="editActive" class="mt-2 p-2 max-lg:w-1/2 lg:w-1/4">Cancel</ButtonCancel>
+        <ButtonSubmit @click="submit" v-if="!editActive" class="mt-8 p-2 max-lg:w-1/2 lg:w-1/4">Add user</ButtonSubmit>
+        <!-- <ButtonSubmit @click="edit" v-if="editActive" class="mr-1 mt-8 p-2 max-lg:w-1/2 lg:w-1/4">Edit user</ButtonSubmit>
+        <ButtonCancel @click="cancel" v-if="editActive" class="mt-2 p-2 max-lg:w-1/2 lg:w-1/4">Cancel</ButtonCancel> -->
       </div>
       <div v-if="isError" class="text-center text-lg text-red-400">
         <span>{{ errorMsg }}</span>
@@ -297,7 +306,7 @@ onUnmounted(() => {
             <td>{{ row.email }}</td>
             <td>{{ row.level }}</td>
             <td :class="windowSize <= 768 ? '' : 'flex'">
-              <div @click="editRowAction(row, true)"><img :src="editImg" alt="" /></div>
+              <!-- <div @click="editRowAction(row, true)"><img :src="editImg" alt="" /></div> -->
               <div @click="deletePopUpAction(row, true)"><img :src="deleteImg" alt="" /></div>
             </td>
           </tr>
@@ -320,7 +329,7 @@ onUnmounted(() => {
       </div>
 
       <div v-if="clickAccount">
-        <ButtonSubmit @click="editAccount" class="mr-1 mt-8 p-2 max-lg:w-1/2 lg:w-1/4">Edit activity</ButtonSubmit>
+        <ButtonSubmit @click="editAccount" class="mr-1 mt-8 p-2 max-lg:w-1/2 lg:w-1/4">Update Account</ButtonSubmit>
         <ButtonCancel @click="accountCancel" class="mt-2 p-2 max-lg:w-1/2 lg:w-1/4">Cancel</ButtonCancel>
       </div>
       <div v-if="myError && clickAccount" class="text-center text-lg text-red-400">
@@ -329,22 +338,31 @@ onUnmounted(() => {
     </div>
     <!--  -->
     <div v-if="deletePopUp" class="note">
-      <div class="card m-auto flex h-[500px] w-[500px] flex-col items-center justify-between border-2 border-red-400 p-4">
+      <div class="card m-auto flex h-[200px] w-[400px] flex-col items-center justify-between border-2 border-red-400 p-4">
         <div class="text-center">
-          <p class="text-xs font-black">
-            {{ popUpData.username }}
+          <p class="text-base">
+           Username: <span class="font-black">{{ popUpData.username }}</span>
           </p>
-          <p class="mb-2 text-xs font-black">
-            {{ popUpData.email }}
+          <p class="mb-2 text-base">
+           Email: <span class="font-black">{{ popUpData.email }}</span>
           </p>
-          <p class="mb-2 text-xs font-medium">{{ popUpData.level }}</p>
+          <p class="mb-2 text-base">Type: <span class="font-medium">{{ popUpData.level }}</span></p>
         </div>
         <div class="flex w-full gap-8">
-          <ButtonWarn @click="destroy(popUpData.userId)" class="w-1/2 p-2">Delete </ButtonWarn>
+          <ButtonWarn @click="destroy(popUpData.userId)" class="w-1/2 p-2">Delete</ButtonWarn>
           <ButtonCancel @click="deletePopUpAction({}, false)" class="w-1/2 p-2">Cancel</ButtonCancel>
         </div>
       </div>
     </div>
+
+    <div v-if="forceLogoutCount > 0" class="note">
+      <div class="card m-auto h-[100px] w-[200px] items-center justify-between border-2 border-red-400 p-4 text-center">
+         <span class="font-black">You will be logout in <span class="text-red-400">{{ forceLogoutCount }}</span></span> 
+          <hr>
+          Account change login again
+      </div>
+    </div>
+
   </div>
 </template>
 

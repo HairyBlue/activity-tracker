@@ -21,7 +21,7 @@ settings:
     staging:
       host: 'localhost'
       user: 'root'
-      password: 'root'
+      password: 'Hairyblue'
       name: 'activity_tracker'
       connectionLimit: 20
   zipInterval: 3600000

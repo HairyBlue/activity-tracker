@@ -38,21 +38,13 @@ router.post("/user", async function (req, res) {
   const user = (req as GetUserRequest).user;
   const { username, email, password, role } = req.body;
 
-  const checkUsername: string = username;
-  const checkEmail: string = email;
-  const checkPassword: string = password;
-  const checkRole: string = role;
-
-  if (checkUsername.trim() === "" || checkEmail.trim() === "" || checkPassword.trim() === "" || checkRole.trim() === "") {
+  if (username.trim().length == 0 || email.trim().length == 0 || password.trim().length == 0) {
     logger.warn(`${user} is failed to add user has a role ${role}`);
     res.status(400).json({ message: "Please complete the form" });
-
-    return;
-  } else if (!validateEmail(checkEmail)) {
+  } else if (!validateEmail(email)) {
     logger.warn(`${user} is failed to add email user has a role ${role}`);
     res.status(400).json({ message: "Invalid email address" });
 
-    return;
   } else {
     const loginUser: any = await show("SELECT * FROM Users WHERE username = ? OR email = ?", [user, user]);
     if (loginUser.length > 0) {
@@ -67,55 +59,47 @@ router.post("/user", async function (req, res) {
         if (isExist.length > 0) {
           logger.warn(`${user} add duplicate entry ${username}`);
           res.status(400).json({ message: "Duplicate entry" });
-          return;
-        }
 
-        const result: any = await create("INSERT INTO Users(username, email, password) values(?, ?, ?)", [
-          username,
-          email,
-          bcryptHashPassword(password),
-        ]);
-
-        const user_id = result.insertId;
-        const level_id: number = isLevelId.staff;
-
-        await create("INSERT INTO Roles(user_id , level_id) values (?, ?)", [user_id, level_id]);
-        logger.info(`${user} add user ${username} that has a role ${role}`);
-        res.json({ message: "success" });
-        return;
-      }
-
-      if (role == "ADMIN" && level[0].level == isLevel.webmaster) {
+        } else {
+          const result: any = await create("INSERT INTO Users(username, email, password) values(?, ?, ?)", [
+            username,
+            email,
+            bcryptHashPassword(password),
+          ]);
+  
+          const user_id = result.insertId;
+          const level_id: number = isLevelId.staff;
+  
+          await create("INSERT INTO Roles(user_id , level_id) values (?, ?)", [user_id, level_id]);
+          logger.info(`${user} add user ${username} that has a role ${role}`);
+          res.status(200).json({ message: "success" });
+        }     
+      }else if (role == "ADMIN" && level[0].level == isLevel.webmaster) {
         const isExist: any = await show("SELECT * FROM Users WHERE username = ? OR email = ?", [username, email]);
 
         if (isExist.length > 0) {
           logger.warn(`${user} add duplicate entry ${username}`);
           res.status(400).json({ message: "Duplicate entry" });
-          return;
+          
+        } else {
+          const result: any = await create("INSERT INTO Users(username, email, password) values(?, ?, ?)", [
+            username,
+            email,
+            bcryptHashPassword(password),
+          ]);
+  
+          const user_id = result.insertId;
+          const level_id: number = isLevelId.admin;
+  
+          logger.info(`${user} add user ${username} that has a role ${role}`);
+          await create("INSERT INTO Roles(user_id , level_id) values (?, ?)", [user_id, level_id]);
+          res.status(200).json({ message: "success" });
         }
-
-        const result: any = await create("INSERT INTO Users(username, email, password) values(?, ?, ?)", [
-          username,
-          email,
-          bcryptHashPassword(password),
-        ]);
-
-        const user_id = result.insertId;
-        const level_id: number = isLevelId.admin;
-
-        logger.info(`${user} add user ${username} that has a role ${role}`);
-        await create("INSERT INTO Roles(user_id , level_id) values (?, ?)", [user_id, level_id]);
-        res.json({ message: "success" });
-        return;
-      }
-
-      if (level[0].level == isLevel.staff || true) {
+      } else if (level[0].level == isLevel.staff || true) {
         logger.warn(`${user} is failed to add user that has a role ${role}`);
         res.status(403).json({ message: "Forbidden request" });
       }
-    } else {
-      res.status(404).json({ message: "No Match Found" });
-    }
+    } 
   }
 });
 
@@ -199,13 +183,11 @@ router.delete("/user/:id", async function (req, res) {
       await destroy("DELETE FROM Users WHERE userId = ?", [user_id]);
       res.status(200).json({ message: "success" });
     }
-
-    if (level[0].level == isLevel.admin) {
+    else if (level[0].level == isLevel.admin) {
       await destroy("DELETE FROM Users WHERE userId = ?", [user_id]);
       res.status(200).json({ message: "success" });
     }
-
-    if (level[0].level == isLevel.staff || true) {
+    else if (level[0].level == isLevel.staff || true) {
       logger.warn(`${user} is trying to delete user`);
       res.status(403).json({ message: "Forbidden request" });
     }
