@@ -37,8 +37,6 @@ const clubNoAct = ref<Array<any>>([]);
 const latest20Activity = ref<Array<any>>([]);
 
 
-const fileName = ref<string>(`Clubs, Organizations And Colleges Activities For Second Semester SY ${year.value}-${Number(year.value) + 1}`)
-
 // Be carefull on this as condition depends on string
 
 function chartLineDataCt(data: any[]) {
@@ -128,6 +126,7 @@ function downloadPdf() {
 }
 
 function exportExcel() {
+    const fileName = ref<string>(`Clubs, Organizations And Colleges Activities For ${semester.value == '1'? 'First' : 'Second'} Semester SY ${year.value}-${Number(year.value) + 1}`)
     const link = document.createElement('a');
     link.href =  `/excel-export?year=${year.value}&semester=${semester.value}&filename=${fileName.value}`
     link.setAttribute("_target", "blank")
