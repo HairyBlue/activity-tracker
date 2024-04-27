@@ -59,7 +59,7 @@ window.addEventListener("keypress", function (event: KeyboardEvent) {
         <span>Activity Tracker</span>
       </div>
       <div class="card flex h-[350px] flex-1 flex-col gap-4 px-6 py-6 text-center font-extrabold">
-        <span class="text-xl">Sign in to your account</span>
+        <span class="text-xl">Login to your account</span>
         <section class="flex flex-col text-start">
           <label for="usernameoremail">Your email or username</label>
           <input id="usernameoremail" type="text" class="h-8" required v-model="emailOrUsername" />
@@ -68,7 +68,7 @@ window.addEventListener("keypress", function (event: KeyboardEvent) {
           <label for="password">Password</label>
           <input id="password" type="password" autocomplete="off" class="h-8" required v-model="password" />
         </section>
-        <ButtonWarn id="login-action" class="mx-auto mt-8 w-3/4 p-2" @click="handleLogin">Sign in to your account</ButtonWarn>
+        <ButtonWarn id="login-action" class="mx-auto mt-8 w-3/4 p-2" @click="handleLogin">Login</ButtonWarn>
         <!-- <span>Forgot your password?</span> -->
         <span v-if="status" :class="status.type == 'success' ? 'text-green-400' : status.type == 'loading' ? 'text-black' : 'text-red-400'"> {{ status.message }}</span>
       </div>
