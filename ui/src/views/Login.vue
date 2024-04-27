@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import ButtonWarn from '../components/globals/buttons/ButtonWarn.vue';
-import { ref } from 'vue';
+import { ref, onBeforeMount } from 'vue';
 import $ from 'jquery';
 import router from '../router';
+import { userStore } from '../store/userStore';
 const emailOrUsername = ref<string>('');
 const password = ref<string>('');
 let status = ref<any>(null);
+const user = userStore()
+let showPage = ref<boolean>(false);
 
 function handleStatus(type: 'error' | 'loading' | 'success', msg: string) {
   status.value = { type: type, message: msg };
@@ -49,10 +52,18 @@ function handleLogin() {
 window.addEventListener("keypress", function (event: KeyboardEvent) {
   if(event.key == "Enter") handleLogin()
 })
+
+onBeforeMount(() => {
+  if (user.getToken() != undefined) {
+    router.go(-1)
+  } else {
+    showPage.value = true;
+  }
+})
 </script>
 
 <template>
-  <div class="login">
+  <div class="login" v-if="showPage">
     <div class="login-form">
       <div class="login-header">
         <img src="/logo.png" alt="" />
