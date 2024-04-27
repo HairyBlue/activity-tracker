@@ -5,6 +5,7 @@ import createRoutes from "./createRoutes";
 import { initDiscord } from "./discord";
 import { Settings } from "luxon"
 import * as settings from "./settings" 
+import * as cron from "./cronjob"
 
 const logger = logging.wichFileToLog("app");
 const app = createRoutes();
@@ -30,6 +31,8 @@ server.listen(3500, "0.0.0.0", () => {
 });
 
 logger.info(`service runs on ${process.env.NODE_ENV} environment`)
+
+cron.dumpSql()
 // TODO: Implement this feature
 // !: IMPORTANT
 // ?: ASK
