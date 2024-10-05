@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drop Me</title>
+
+    <style>
+      .dropCard {
+        width: 500px;
+        height: 500px;
+        border: 1px dotted red;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .dropText {
+        text-align: center;
+        margin-bottom: 0.5em;
+      }
+      .add-sign {
+        font-size: 2em;
+        font-weight: bold;
+      }
+      #images,
+      #pdfs,
+      #videos {
+        display: flex;
+        gap: 10px;
+      }
+
+      label {
+        font-weight: 600;
+        color: rgb(115, 113, 238);
+      }
+      input {
+        display: none;
+      }
+
+      img {
+        max-width: 400px;
+        max-height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dropContainer">
+      <h1>Drop Me</h1>
+      <div id="drop-zone" class="dropCard blur">
+        <div class="dropText">
+          <div class="add-sign">+</div>
+          <div>
+            Drag and drop file here
+            <br />
+            or
+            <br />
+            <label for="file-input">Choose File</label>
+            <input type="file" id="file-input" multiple />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="list-container">
+      <div id="images"></div>
+      <div id="videos"></div>
+      <div id="pdfs"></div>
+    </div>
+    <div>
+      <button id="submit">Submit</button>
+    </div>
+    <script>
+      const maxImage = 5;
+      const maxPdf = 2;
+      const maxVideo = 1;
+
+      const maxImageSize = 5 * 1024 * 1024;
+      const maxPdfSize = 20 * 1024 * 1024;
+      const maxVideoSize = 100 * 1024 * 1024;
+
+      const filesStored = {
+        image: [],
+        pdf: [],
+        video: [],
+      };
+
+      const dropContainer = document.getElementById("dropContainer");
+      const dropZone = document.getElementById("drop-zone");
+      const fileInput = document.getElementById("file-input");
+
+      const imgList = document.getElementById("images");
+      const pdfList = document.getElementById("pdfs");
+      const videoList = document.getElementById("videos");
+
+      const removeButton = document.querySelector(".remove-file-btn");
+      const submintBtn = document.getElementById("submit");
+
+      submintBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        postFiles();
+      });
+
+      dropZone.addEventListener("dragover", function (event) {
+        event.preventDefault();
+      });
+
+      dropZone.addEventListener("drop", function (event) {
+        event.preventDefault();
+        addFile(event.dataTransfer.files);
+      });
+
+      fileInput.addEventListener("change", function (event) {
+        event.preventDefault();
+        addFile(event.target.files);
+      });
+
+      document.addEventListener("click", function (event) {
+        removeFile(event);
+      });
+
+      function addFile(rawFiles) {
+        const files = rawFiles; // event.dataTransfer.files;
+        attachedFiles(files, cb);
+      }
+
+      function cb(errMsg, files = null) {
+        const attrID = "upload-error-msg";
+        const errorId = document.getElementById(attrID);
+
+        if (errorId) {
+          errorId.remove();
+        }
+
+        if (errMsg) {
+          const spanErrMsg = document.createElement("span");
+          spanErrMsg.id = attrID;
+          spanErrMsg.textContent += errMsg.replace(/\//g, "");
+          dropContainer.append(spanErrMsg);
+        } else {
+          if (files) appendFiles(files);
+        }
+      }
+
+      /**
+       * @param {Array} files - array of files
+       * @return {string}
+       */
+
+      function attachedFiles(files, cb) {
+        const imageRgx = /jpeg|jpg|png/;
+        const pdfRgx = /pdf/;
+        const videoRgx = /mp4|webm|ogg/;
+
+        let errorMessage = null;
+
+        for (let file of files) {
+          const fileType = file.type;
+          const fileName = file.name.toLowerCase();
+          const fileExt = getExtName(fileName);
+
+          if (fileType.startsWith("image/")) {
+            if (!imageRgx.test(fileExt)) {
+              errorMessage =
+                "Image upload only supports the following file types - " +
+                imageRgx;
+            }
+            if (filesStored.image.length + 1 > maxImage) {
+              errorMessage =
+                "Limit image upload up to " + maxImage + " images only";
+            }
+          } else if (fileType === "application/pdf") {
+            if (!pdfRgx.test(fileExt)) {
+              errorMessage =
+                "Document upload only supports the following file types - " +
+                pdfRgx;
+            }
+            if (filesStored.pdf.length + 1 > maxPdf) {
+              errorMessage = "Limit pdf upload up to " + maxPdf + " pdf's only";
+            }
+          } else if (fileType.startsWith("video/")) {
+            if (!videoRgx.test(fileExt)) {
+              errorMessage =
+                "Video upload only supports the following file types - " +
+                videoRgx;
+            }
+
+            if (filesStored.video.length + 1 > maxVideo) {
+              console.log(filesStored.video.length + 1 > maxVideo);
+              errorMessage =
+                "Limit video upload up to " + maxVideo + " video only";
+            }
+          } else {
+            errorMessage = "File upload only supports image, pdf, and video";
+          }
+        }
+
+        cb(errorMessage, files);
+      }
+
+      /**
+       *
+       * @param {string} file - The name of the file.
+       * @returns {string} The file extension.
+       */
+      function getExtName(file) {
+        const filePart = file.split(".");
+
+        if (typeof filePart != "object") {
+          return "";
+        }
+
+        return filePart[filePart.length - 1];
+      }
+
+      function appendFiles(files) {
+        for (let file of files) {
+          const fileType = file.type;
+          const fileName = file.name;
+          const fileSize = file.size;
+          const fileUrl = URL.createObjectURL(file);
+
+          const uniqueSuffix =
+            Date.now() + "-" + Math.round(Math.random() * 1e9);
+
+          const obj = {
+            fileName: fileName,
+            fileId: uniqueSuffix,
+            fileContent: file,
+          };
+
+          if (fileType.startsWith("image/")) {
+            obj.maxSize = maxImageSize;
+            filesStored.image.push(obj);
+            appendImage(
+              file,
+              fileType,
+              fileName,
+              fileSize,
+              fileUrl,
+              uniqueSuffix
+            );
+          } else if (fileType == "application/pdf") {
+            obj.maxSize = maxPdfSize;
+            filesStored.pdf.push(obj);
+            appendPdf(
+              file,
+              fileType,
+              fileName,
+              fileSize,
+              fileUrl,
+              uniqueSuffix
+            );
+          } else if (fileType.startsWith("video/")) {
+            obj.maxSize = maxVideoSize;
+            filesStored.video.push(obj);
+            appendVideo(
+              file,
+              fileType,
+              fileName,
+              fileSize,
+              fileUrl,
+              uniqueSuffix
+            );
+          }
+        }
+      }
+      // APPEND IMAGE
+      function appendImage(
+        file,
+        fileType,
+        fileName,
+        fileSize,
+        fileUrl,
+        uniqueSuffix
+      ) {
+        const img = document.createElement("img");
+        const wrapper = document.createElement("div");
+
+        img.src = fileUrl;
+        img.alt = fileName;
+        wrapper.appendChild(img);
+
+        appendInfo(
+          wrapper,
+          fileName,
+          fileSize,
+          maxImageSize,
+          "Image",
+          uniqueSuffix
+        );
+
+        wrapper.id = uniqueSuffix;
+        imgList.appendChild(wrapper);
+      }
+      // APPEND PDF
+      function appendPdf(
+        file,
+        fileType,
+        fileName,
+        fileSize,
+        fileUrl,
+        uniqueSuffix
+      ) {
+        const pdf = document.createElement("iframe");
+
+        const wrapper = document.createElement("div");
+
+        pdf.src = fileUrl;
+        pdf.alt = fileName;
+        pdf.width = "600";
+        pdf.height = "400";
+        wrapper.appendChild(pdf);
+
+        appendInfo(
+          wrapper,
+          fileName,
+          fileSize,
+          maxPdfSize,
+          "Pdf",
+          uniqueSuffix
+        );
+
+        wrapper.id = uniqueSuffix;
+        pdfList.appendChild(wrapper);
+      }
+
+      // APPEND VIDEO
+      function appendVideo(
+        file,
+        fileType,
+        fileName,
+        fileSize,
+        fileUrl,
+        uniqueSuffix
+      ) {
+        const video = document.createElement("video");
+        const source = document.createElement("source");
+
+        const wrapper = document.createElement("div");
+
+        video.width = "600";
+        video.height = "400";
+        video.controls = true;
+
+        source.src = fileUrl;
+        source.type = fileType;
+
+        video.appendChild(source);
+        wrapper.appendChild(video);
+
+        appendInfo(
+          wrapper,
+          fileName,
+          fileSize,
+          maxVideoSize,
+          "Video",
+          uniqueSuffix
+        );
+
+        wrapper.id = uniqueSuffix;
+        videoList.appendChild(wrapper);
+      }
+
+      function appendInfo(
+        wrapper,
+        fileName,
+        fileSize,
+        maxSize,
+        uploadFile,
+        uniqueSuffix
+      ) {
+        const filename = document.createElement("div");
+        const filesize = document.createElement("div");
+        const button = document.createElement("button");
+
+        filename.textContent += fileName;
+        filename.classList.add("file-name");
+        wrapper.appendChild(filename);
+
+        filesize.textContent += "File size: " + bytesToMb(fileSize);
+        filesize.classList.add("file-size");
+        wrapper.appendChild(filesize);
+
+        if (fileSize > maxSize) {
+          const filesizeLimit = document.createElement("div");
+          filesizeLimit.textContent += `${uploadFile} upload only supports up to ${bytesToMb(
+            maxSize
+          )}`;
+          filesizeLimit.classList.add("file-size-exceed");
+          wrapper.appendChild(filesizeLimit);
+        }
+
+        button.textContent += `remove ${uploadFile.toLowerCase()}`;
+        button.classList.add("remove-file-btn");
+        button.id = "remove-" + uniqueSuffix;
+
+        wrapper.appendChild(button);
+      }
+
+      function bytesToMb(bytes) {
+        return (bytes / (1024 * 1024)).toFixed(2).toString() + "mb";
+      }
+
+      function removeFile(event) {
+        const targetID = event.target.id;
+        const targetClass = event.target.classList;
+
+        if (!targetID && !targetClass) return;
+        if (!targetClass.contains("remove-file-btn")) return;
+
+        const fid = targetID.replace("remove-", "");
+        const removeElement = document.getElementById(fid);
+        removeElement.remove();
+        removeFileStored(fid);
+        // console.log(filesStored);
+      }
+
+      function removeFileStored(fid) {
+        for (let files in filesStored) {
+          const filtered = filesStored[files].filter(
+            (obj) => obj.fileId != fid
+          );
+          filesStored[files] = filtered;
+        }
+      }
+
+      function checkFile() {
+        if (
+          filesStored.image.length === 0 &&
+          filesStored.pdf.length === 0 &&
+          filesStored.video.length === 0
+        ) {
+          return false;
+        }
+
+        for (let files in filesStored) {
+          for (let file of filesStored[files]) {
+            const contentSize = file.fileContent.size;
+            const fileExceed = contentSize > file.maxSize;
+
+            if (fileExceed) {
+              alert(
+                `Failed to submit, ${file.fileContent.name} (${bytesToMb(
+                  contentSize
+                )}) exceed file upload to ${bytesToMb(file.maxSize)}`
+              );
+              return false;
+            }
+          }
+        }
+
+        return true;
+      }
+
+      function postFiles() {
+        if (checkFile()) {
+          const formData = new FormData();
+
+          for (let category in filesStored) {
+            for (let file of filesStored[category]) {
+              formData.append(category, file.fileContent);
+            }
+          }
+          formData.forEach((value, key) => {
+            console.log(`${key}:`, value);
+          });
+          // fetch("/file-upload", {
+          //   method: "POST",
+          //   body: formData,
+          //   headers: {
+          //     Authorization:
+          //       "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbE9yVXNlcm5hbWUiOiJkZWZhdWx0IiwiaWF0IjoxNzIxNTI0NzY1fQ.kt39BepQNFDVp8_m1a9WHpTzDUwQ7SryMrsJSOn2Cto",
+          //   },
+          // })
+          //   .then((response) => {
+          //     return response.json();
+          //   })
+          //   .then((data) => {
+          //     console.log(data);
+          //   })
+          //   .catch((err) => {
+          //     console.log(err);
+          //   });
+        }
+      }
+    </script>
+  </body>
+</html>
