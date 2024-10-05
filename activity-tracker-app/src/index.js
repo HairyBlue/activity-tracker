@@ -20,10 +20,7 @@ const createWindow = () => {
     win.loadFile(path.join(__dirname, "503.html"));
   });
 
-  if (process.env.NODE_ENV == "development") {
-    win.webContents.openDevTools();
-  }
-  
+  win.maximize();
 };
 
 app.whenReady().then(() => {

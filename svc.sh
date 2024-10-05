@@ -25,7 +25,7 @@ function electron() {
 
         echo "Building and package for electron app"
         npm install || exitf "failed to install packages for electron"
-        npm run make || exitf "failed to make electron app"
+        npm run make -- --platform win32 || exitf "failed to make electron app for windows"
 
         cd "$current_dir"
     fi
