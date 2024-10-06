@@ -211,7 +211,11 @@ onMounted(()=>{
                   </svg>
                 </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
                 <span>Activity Tracker is now available for windows. <a :href="activityTrackerApp" name="activity-tracker-app.zip" class="underline hover:font-bold ">Click to download</a></span>
+=======
+                <span>Activity Tracker is now available for windows. <a :href="activityTrackerApp" class="underline hover:font-bold ">Click to download</a></span>
+>>>>>>> master
 =======
                 <span>Activity Tracker is now available for windows. <a :href="activityTrackerApp" class="underline hover:font-bold ">Click to download</a></span>
 >>>>>>> master
