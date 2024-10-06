@@ -16,9 +16,14 @@ const createWindow = () => {
     autoHideMenuBar: true
   });
 
-  win.loadURL(process.env.ELECTRON_URL).catch(() => {
-    win.loadFile(path.join(__dirname, "503.html"));
-  });
+  win.loadFile(path.join(__dirname, "loading.html"));
+
+  setTimeout(()=>{
+    win.loadURL(process.env.ELECTRON_URL)
+    .catch(() => {
+      win.loadFile(path.join(__dirname, "503.html"));
+    });
+  }, 1000)
 
   win.maximize();
 };

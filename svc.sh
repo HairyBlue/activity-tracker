@@ -18,21 +18,21 @@ function exitf(){
 
 function electron() {
     cd "$current_dir"
-    win32x64=./activity-tracker-app/out/make/zip/win32/x64/activity-tracker-app-win32-x64-1.0.0.zip
+    win32x64=$(ls ./activity-tracker-app/out/make/squirrel.windows/x64/activity-tracker-app-*Setup.exe)
 
     if [[ "$1" == "--build" ]]; then
         cd ./activity-tracker-app
 
         echo "Building and package for electron app"
-        npm install || exitf "failed to install packages for electron"
-        npm run make -- --platform win32 || exitf "failed to make electron app for windows"
+        npm install  || exitf "failed to install packages for electron"
+        npm run make || exitf "failed to make electron app for windows"
 
         cd "$current_dir"
     fi
 
-    if [[ -f "$win32x64" ]]; then
-        echo "Copy zip file to public dist"
-        cp $win32x64 ./server/dist/public
+    if [[ -n "$win32x64" ]]; then
+        echo "Copy Setup exe file to public dist"
+        cp "$win32x64" ./server/dist/public || exitf "No Setup exe file found to copy."
     fi
 
     cd "$current_dir"

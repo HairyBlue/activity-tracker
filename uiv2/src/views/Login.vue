@@ -20,7 +20,10 @@ const loginOk = ref<boolean>(false);
 const showPassword = ref<boolean>(false);
 
 const activityTrackerApp = "https://drive.google.com/drive/folders/1-IM-mGe3oqkGGgS_mdmyinVrp-j-1YkF?usp=drive_link" //`${user.basePath}/activity-tracker-app-win32-x64-1.0.0.zip`;
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 const enableDownloadApp = ref<boolean>(true);
 
 function removeDownloadPopup() {
@@ -212,7 +215,11 @@ onMounted(()=>{
                 </div>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                 <span>Activity Tracker is now available for windows. <a :href="activityTrackerApp" name="activity-tracker-app.zip" class="underline hover:font-bold ">Click to download</a></span>
+=======
+                <span>Activity Tracker is now available for windows. <a :href="activityTrackerApp" class="underline hover:font-bold ">Click to download</a></span>
+>>>>>>> master
 =======
                 <span>Activity Tracker is now available for windows. <a :href="activityTrackerApp" class="underline hover:font-bold ">Click to download</a></span>
 >>>>>>> master
