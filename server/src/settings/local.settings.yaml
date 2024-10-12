@@ -1,0 +1,18 @@
+settings:
+  user:
+    username: "default" #"default"
+    email: "default@cjc.com" # "default@cjc.com"
+    password: "$2b$12$O/EVmQr50yW7j.RgOUerfO4XVSI8YdPihwOOb9d7KcMZ2z/yo6jMq"
+    uuid: "3ddb0697-bcf3-4457-a3cd-2878f7ee53e5"
+  db:
+    host: "localhost"
+    user: "root"
+    password: "Hairyblue"
+    name: "activity_tracker"
+    connectionLimit: 20
+    # waitForConnections: true
+    # maxIdle: 10
+    # idleTimeout: 60000
+    # queueLimit: 0
+    # enableKeepAlive: true
+    # keepAliveInitialDelay: 0

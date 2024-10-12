@@ -1,0 +1,102 @@
+:root {
+  --main-bg-color: #f1f6f8;
+  --white-color: #fcfefe;
+  --dark-color: #030712;
+  --gray-color: #9ca3af;
+
+  --font-s-sm: 0.8em;
+  --font-s-reg: 1em;
+  --font-s-md: 1.5em;
+  --font-s-lg: 2em;
+  --font-s-xl: 3em;
+
+  --font-w-req: 400;
+  --font-w-md: 500;
+  --font-w-lg: 600;
+  --font-w-xl: 900;
+
+  --box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+*, *::before, *::after {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  cursor: default;
+}
+
+/* ::-webkit-scrollbar {
+    display: none;
+} */
+
+/* Hide scrollbar for Firefox */
+/* html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+} */
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Regular.ttf');
+}
+
+/* html {
+  background-color: #f1f6f8;
+  overflow: hidden;
+} */
+
+body {
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Open Sans',
+    'Helvetica Neue',
+    sans-serif;
+  font-size: var(--font-s-sm);
+  font-weight: var(--font-w-req);
+  color: var(--dark-color);
+  background-color: var(--main-bg-color);
+  cursor: default;
+  overflow-x: hidden;
+}
+
+
+/* input,
+textarea,
+select {
+  border: 1px solid var(--gray-color);
+  border-radius: 4px;
+} */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  /* padding: 0 2px 0 2px; */
+}
+
+button {
+  border: none;
+}
+button:hover,
+a:hover {
+  cursor: pointer;
+}
+/* .card {
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  background-color: var(--white-color);
+  border-radius: 4px;
+} */
+
+.debug-css{
+  border: 1px dashed black;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

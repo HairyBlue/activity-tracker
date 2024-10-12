@@ -1,0 +1,26 @@
+settings:
+  secret: "8d9265aa67d404e787a7be9c09be06db56563701fda19de54d26869d5888285a38eb087045e484e25b04886ddb214cd169a42120252f6a105e7166628db90149" # crypto.randomBytes(64).toString('hex');
+  zipInterval: 10800000 # every 3 hours  # 3600000
+  discord: 
+    prodKey: ""
+    devKey: ""
+    delay: 500
+
+  attachments:
+    maxUpload:
+      images: 5
+      pdfs: 2
+      videos: 1
+
+    maxSize:
+      images: 5242880 # 5mb => 5 * 1024 * 1024
+      pdfs: 3145728 # 3mb => 3 * 1024 * 1024
+      videos: 26214400 # 25mb => 25* 1024 * 1024
+
+    regx:
+      images: /jpeg|jpg|png|gif/
+      pdfs: /pdf/
+      videos: /mp4|webm|ogg/
+
+  client:
+    secret: 'zYG6uuNtesuGk+2+LDv5Y1zhZThKlPg8fkji5GVSrAU=' # crypto.randomBytes(32).toString('base64')

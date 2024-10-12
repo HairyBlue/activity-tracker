@@ -1,0 +1,36 @@
+NODE_ENV=development
+VITE_NODE_ENV=development
+
+LOGIN_DEFAULT=False
+
+MYSQL_DB_HOST=127.0.0.1
+MYSQL_DB_NAME=activity_tracker_dev
+MYSQL_DB_USER=
+MYSQL_DB_PASSWORD=
+MYSQL_DB_LIMIT=97
+
+SERVER_PORT=3501
+
+# require("crypto").randomBytes(64).toString('hex')
+JWT_SECRET=
+
+VITE_TARGET_API=
+VITE_PUBLIC_PATH=staging-activity-tracker
+VITE_MAX_USER_AGE=3
+
+PM2_NAME=staging-activity-tracker
+# Using FNM as nodemanager linux, /home/<user>/.local/share/fnm/node-versions/<version>/installation/bin/node
+PM2_INTERPRETER=
+
+MAX_IMAGE_COUNT=5
+MAX_PDF_COUNT=2
+MAX_VIDEO_COUNT=1
+
+MAX_IMAGE_SIZE=5
+MAX_PDF_SIZE=3
+MAX_VIDEO_SIZE=25
+
+# production - used for staging-production. note sure though | development - local development not on linux/vps
+DISCORD_USED=development
+
+ELECTRON_URL='http://localhost:3500/'

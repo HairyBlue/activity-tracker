@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  # img_build:
+  #   image: node:18-alpine
+  #   restart: no
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     - db
+  #   command: ['echo', "Image build complete"]
+  
+  app:
+    container_name: activity_tracker_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3500:3500"
+    expose:
+      - "3500"
+    depends_on:
+      - db
+    # volumes:
+    #   - ./bak/logs:/opt/docker/activity-tracker/server/dist/log
+    env_file:
+      - .env
+
+  db:
+    image: mysql:latest
+    restart: always
+    container_name: activity_tracker_db
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DB_NAME}
+      MYSQL_USER: ${MYSQL_DB_USER}
+      MYSQL_PASSWORD: ${MYSQL_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: "root"
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - my-db:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - .env
+
+volumes:
+  my-db:

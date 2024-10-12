@@ -1,0 +1,27 @@
+# Excude dependcies
+**/node_modules
+node_modules
+**/letsencrypt
+letsencrypt
+
+# .env for credential
+.env
+
+# sqls
+# sqls/**
+# .sql
+
+logs
+logs/**
+**/logs
+
+bash.*
+
+**/attachments
+# z_env_config.txt
+
+bak
+bak/**
+
+opt
+opt/**
