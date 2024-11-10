@@ -188,3 +188,8 @@ sudo chmod 775 -R /home/<user>/Laraplex
 
 sudo chmod 775 -R storage
 ```
+
+### For Auth page bg image
+```css
+background-image: url("{{env('APP_URL') . '/images/norbert_bg.jpg'}}");
+```
