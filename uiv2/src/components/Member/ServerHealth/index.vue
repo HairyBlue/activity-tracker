@@ -7,7 +7,7 @@ import { userStore } from '../../../store/userStore';
 
 const router = useRouter();
 
-const accessby2 = 'WEBMASTER|ADMIN';
+const accessby = 'WEBMASTER';
 const user = userStore();
 
 const level = user.getDecryptedLevel();
@@ -36,7 +36,7 @@ function fetchData() {
 
 onMounted(() => {
   if (typeof level == "string" && level) {
-    if (level.match(accessby2)) {
+    if (level.match(accessby)) {
       hasAccess.value = true;
       user.level = level;
     } else {
@@ -66,6 +66,22 @@ onMounted(() => {
         {{ mem }}
       </p>
     </div>
+
+    <div v-if="data.diskSpace" class="debug-css card mt-4 w-full rounded-none bg-base-100 p-4">
+      <h2 class="text-xl font-semibold">Disk Space</h2>
+
+      <p v-if="data.diskSpace.path" class="text-base">
+        Path => {{ data.diskSpace.path }}
+      </p>
+      <p v-if="data.diskSpace.free" class="text-base">
+        Free => {{ data.diskSpace.free }}
+      </p>
+      <p v-if="data.diskSpace.size" class="text-base">
+        Size => {{ data.diskSpace.size }}
+      </p>
+
+    </div>
+
     <!-- v-if="data.logs.legnth > 0 "  -->
     <div v-if="data.logs" class="debug-css card mt-4 w-full overflow-x-auto rounded-none bg-base-100 p-4">
       <div class="flex gap-4 items-center">

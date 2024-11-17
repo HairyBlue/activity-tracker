@@ -7,7 +7,7 @@ import { configs } from "./settings";
 import { show, create, update, destroy } from "./db/dbcon";
 import { GetUserRequest, DocLocation } from "./types";
 import { getAccessLevel, getStudentProfile, approveAccess } from "./auth";
-import { activityAndDoc, getActivityAndClub } from "./commonData";
+import { getDocuments, getActivityAndClub } from "./commonData";
 import { r_uuid } from "./helpers/svcfunc";
 
 import express = require("express");
@@ -152,22 +152,21 @@ const storage = multer.diskStorage({
  async function generateFilePath(req: express.Request, res: express.Response, next: express.NextFunction) {
   try {
     
-     const activity_uuid = req.params.activity_uuid;
+     const activity_same_record_uuid = req.params.activity_same_record_uuid;
 
-     if (!activity_uuid) {
+     if (!activity_same_record_uuid) {
        return res.status(400).json({ error: "Bad Request" });
      }
    
-     let result: any = await activityAndDoc(activity_uuid);
-     result = result[0];
-   
-     if (result.documentLocation) {
-        filePathExtented = result.documentLocation;
+     let result: any = await getDocuments(activity_same_record_uuid);
+    //  console.log(result)
+     if (result.length > 0 && result[0].documentLocation) {
+        filePathExtented = result[0].documentLocation;
 
         if (req.query.imageCaptions) {
           let imageCaptions: any = req.query.imageCaptions;
 
-          const parseDoc: any[] = JSON.parse(result.documentInfo);
+          const parseDoc: any[] = JSON.parse(result[0].documentInfo);
 
           const infos: string[] = imageCaptions.split("|");
   
@@ -193,7 +192,7 @@ const storage = multer.diskStorage({
           }
   
           const stringifyDoc = JSON.stringify(parseDoc);
-          await update("Update Documents Set documentInfo = ? Where documentId = ?", [stringifyDoc, result.documentId]);
+          await update("Update Documents Set documentInfo = ? Where documentId = ?", [stringifyDoc, result[0].documentId]);
         }
 
      } else {
@@ -201,10 +200,10 @@ const storage = multer.diskStorage({
         const uuid = r_uuid();
         let clubName = ""
        
-        if ( result.clubAcronym ) {
-          clubName = result.clubAcronym
-        } else if (result.clubName) {
-          clubName = result.clubName
+        if ( result[0].clubAcronym ) {
+          clubName = result[0].clubAcronym
+        } else if (result[0].clubName) {
+          clubName = result[0].clubName
         } else {
           clubName = "UNKNOWN"
         }
@@ -214,7 +213,7 @@ const storage = multer.diskStorage({
              .toUpperCase()
              .replace(/\//g, "_")
        
-         const extendedpath = `/${result.activitySchoolYear}/${clubName}/${millis}/${uuid}`
+         const extendedpath = `/${result[0].activitySchoolYear}/${clubName}/${millis}/${uuid}`
          filePathExtented = attachmentsDir + extendedpath;
              
          let imageCaptions: any = req.query.imageCaptions;
@@ -246,7 +245,7 @@ const storage = multer.diskStorage({
          imageCaptions = JSON.stringify(captions);
     
          // document.insertId
-         await create(`INSERT INTO Documents (document_activity_id, documentInfo, documentLocation) values (?, ?, ?)`, [result.activityId, imageCaptions, filePathExtented]);
+         await create(`INSERT INTO Documents (document_activity_same_uuid, documentInfo, documentLocation) values (?, ?, ?)`, [activity_same_record_uuid, imageCaptions, filePathExtented]);
    }
 
    next()
@@ -311,33 +310,41 @@ async function prepareFileUpload (req: express.Request, res: express.Response, n
  
 
 async function getStaticFiles(req: express.Request, res: express.Response) {
-  const activity_uuid = req.params.activity_uuid;
+  const activity_same_record_uuid = req.params.activity_same_record_uuid;
 
-  if (!activity_uuid) {
+  if (!activity_same_record_uuid) {
     return res.status(400).json({ error: "Bad Request" });
   }
 
-  let result: any = await activityAndDoc(activity_uuid);
-  result = result[0];
- 
+  let result: any = await getDocuments(activity_same_record_uuid);
+
+
   const filesInfo: any = {
-    documentId: result.documentId,
+    documentId: result[0].documentId,
     images: [],
     pdfs: [],
     videos: [],
-    caption: result.documentInfo ? JSON.parse(result.documentInfo): null
+    caption: null //result.documentInfo ? JSON.parse(result.documentInfo): null
   }
 
-  if (result.documentLocation) {
+  if (result.length == 0) {
+    res.status(200)
+    res.json({data: filesInfo})
+
+    return
+  }
+
+ 
+  if (result[0].documentLocation) {
     for (let category of ["/images/", "/pdfs/", "/videos/"]) {
-      const filePath = path.join(__dirname, result.documentLocation);
+      const filePath = path.join(__dirname, result[0].documentLocation);
 
       if (fs.existsSync(filePath + category)) {
         const files = fs.readdirSync(filePath + category);
 
         for (let file of files) {
           const cleanedCat = category.replace(/\//g, "");
-          const generatedUrl = result.documentLocation + category + file;
+          const generatedUrl = result[0].documentLocation + category + file;
 
           filesInfo[cleanedCat].push(generatedUrl);
         }
@@ -393,9 +400,10 @@ async function deleteFiles(req: express.Request, res: express.Response) {
 
 }
 
- router.post("/file-upload/:activity_uuid/", generateFilePath, prepareFileUpload, handleFileUpload);
 
- router.get("/file-upload/:activity_uuid/", getStaticFiles);
+ router.post("/file-upload/:activity_same_record_uuid/", generateFilePath, prepareFileUpload, handleFileUpload);
+
+ router.get("/file-upload/:activity_same_record_uuid/", getStaticFiles);
 
  router.delete("/file-upload", deleteFiles);
 

@@ -55,20 +55,20 @@ async function getEachClub(club_uuid: string) {
    return await show("SELECT * from Club Where club_uuid = ? AND clubArchive = 0", [club_uuid]);
 }
 
-async function getEachCat(category_uuid: string) {
+async function getEachCategory(category_uuid: string) {
    return await show("SELECT * from Category Where category_uuid = ? AND categoryArchive = 0", [category_uuid]);
 }
 
-async function activityAndDoc(activity_uuid: string) {
+async function getDocuments(activity_same_record_uuid: string) {
    const query = `
    Select * From Activity
    LEFT JOIN Club ON club_id = clubId
-   LEFT JOIN Documents ON activityId = document_activity_id
-   WHERE activity_uuid = ? AND activityArchive = 0`
+   LEFT JOIN Documents ON activity_same_record_uuid = document_activity_same_uuid
+   WHERE activity_same_record_uuid = ? AND activityArchive = 0`
 
    const cleanedQuery = cleanQuery(query)
 
-   return await show(cleanedQuery, [activity_uuid])
+   return await show(cleanedQuery, [activity_same_record_uuid])
 }
 
 async function getActivityAndClub(activity_uuid: string) {
@@ -133,8 +133,8 @@ router.get("/activity-count", async function(req: express.Request, res: express.
 export {
    router,
    initAll,
-   getEachCat,
+   getEachCategory,
    getEachClub,
-   activityAndDoc,
+   getDocuments,
    getActivityAndClub
 }

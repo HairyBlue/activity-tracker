@@ -19,6 +19,13 @@ function register() {
     res.json({ result: data });
   });
 
+  router.get("/club-archive", async function (req, res) {
+    const data = await show("SELECT * FROM Club Where clubArchive = 1", [])
+    
+    res.status(200);
+    res.json({ result: data });
+  });
+
  // ***************************************************************************************************************************************************
   router.post("/club", async function (req, res) {
     const user_uuid = (req as GetUserRequest).user_uuid;
@@ -92,17 +99,36 @@ function register() {
     }
 
     const clubId = Number(req.params.id);
-    console.log(clubId)
+    // console.log(clubId)
     await update("UPDATE Activity SET activityArchive = 1 WHERE club_id = ?", [clubId]);
     await update("UPDATE Club SET clubArchive = 1 WHERE clubId = ?", [clubId]);
 
-    logger.info(`club was delete by ${user.username}`);
+    logger.info(`club was archive by ${user.username}`);
     
     res.status(200);
     res.json({ message: "success" });
   });
   
+  router.patch("/club-restore/:id", async function (req: express.Request, res: express.Response) {
+    const user_uuid = (req as GetUserRequest).user_uuid;
+    const userAccess: any = await getAccessLevel(user_uuid);
+    const user = userAccess.user;
+    const approve =  approveAccess(userAccess.level, "WEBMASTER|ADMIN");
 
+    if (!approve) {
+      return res.status(403).json({error: "Forbidden"})
+    }
+
+    const clubId = Number(req.params.id);
+
+    await update("UPDATE Activity SET activityArchive = 0 WHERE club_id = ?", [clubId]);
+    await update("UPDATE Club SET clubArchive = 0 WHERE clubId = ?", [clubId]);
+
+    logger.info(`club was restore by ${user.username}`);
+    res.status(200);
+    res.json({ message: "success" });
+  });
+  
 
   return router;
 }

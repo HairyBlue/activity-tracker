@@ -12,7 +12,7 @@ const queryCategory =
   " " +
   "LEFT JOIN Category on category_id = categoryId" +
   " " +
-  "WHERE club_id = ? AND activitySchoolYear = ? AND activitySemester = ?  AND activityArchive = 0" +
+  "WHERE club_id = ? AND activitySchoolYear = ? AND activitySemester = ?  AND activityArchive = 0 AND activityStatus = ?" +
   " " +
   "GROUP BY category_id";
 
@@ -21,7 +21,7 @@ const queryCategoryMonth =
   " " +
   "LEFT JOIN Category ON category_id = categoryId" +
   " " +
-  "WHERE club_id = ?  AND activitySchoolYear = ? AND activitySemester = ?  AND activityArchive = 0" +
+  "WHERE club_id = ?  AND activitySchoolYear = ? AND activitySemester = ?  AND activityArchive = 0 AND activityStatus = ?" +
   " " +
   "GROUP BY categoryId, MONTH(activityStartDateIso)";
 
@@ -35,13 +35,15 @@ class ClubsOrganizatons {
   categories: any[];
   year: string;
   sem: string;
+  status: string
   all: clubOrgType;
 
-  constructor (clubs: any, categories: any, year: string, sem: string) {
+  constructor (clubs: any, categories: any, year: string, sem: string, status: string) {
     this.clubs = clubs;
     this.categories = categories;
     this.year = year;
     this.sem = sem;
+    this.status = status;
 
     this.all = {
       data: this.clubs
@@ -53,7 +55,7 @@ class ClubsOrganizatons {
     const newData = [];
     
     for (let club of data) {
-      const params = [club.clubId, this.year, this.sem];
+      const params = [club.clubId, this.year, this.sem, this.status];
       const result: any = await show(query, params);
 
       if (result.length == 0 && !result) {
@@ -91,7 +93,7 @@ class ClubsOrganizatons {
     const newData = [];
     
     for (let club of data) {
-      const params = [club.clubId, this.year, this.sem];
+      const params = [club.clubId, this.year, this.sem, this.status];
       const result: any = await show(query, params);
      
       if (result.length == 0 && !result) {
@@ -148,14 +150,14 @@ class ClubsOrganizatons {
 
 
 
-async function processCO(req: express.Request , year: string, sem: string) {
+async function processCO(req: express.Request , year: string, sem: string, status: string) {
 
   const common = await initAll(req);
 
   const clubs = common.initClub;
   const categories = common.initCategory;
 
-  const clubOrg = new ClubsOrganizatons(clubs, categories, year, sem);
+  const clubOrg = new ClubsOrganizatons(clubs, categories, year, sem, status);
 
   await clubOrg.getCategory(queryCategory);
   await clubOrg.getCategoryMonth(queryCategoryMonth);
@@ -163,10 +165,10 @@ async function processCO(req: express.Request , year: string, sem: string) {
   return clubOrg.getData();
 }
 
-router.get("/club-org/:activitySchoolYear/:semester", async function(req, res){
-  const {activitySchoolYear, semester} =  req.params;
+router.get("/club-org/:activitySchoolYear/:semester/:status", async function(req, res){
+  const {activitySchoolYear, semester, status} =  req.params;
 
-  const result = await processCO(req, activitySchoolYear, semester);
+  const result = await processCO(req, activitySchoolYear, semester, status);
   
   res.status(200);
   res.json(result)

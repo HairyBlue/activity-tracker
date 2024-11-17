@@ -4,7 +4,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { userStore } from '../../../../store/userStore';
 
-const router = useRouter();
+const router =useRouter();
 const route = useRoute();
 const user = userStore();
 
@@ -260,9 +260,10 @@ function uploadFiles() {
       beforeSend: function (xhr) {
         xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
       },
-    }).done(() => {
+    })
+    .done(()=>{
       router.go(0);
-    });
+    })
   }
 }
 
@@ -284,24 +285,27 @@ function getStaticFiles() {
   });
 }
 
-function deleteFiles() {
-  const data = JSON.stringify({
-    documentId: documentId.value,
-    fileName: fileNameToDelete.value,
-    filePathToDelete: filePathToDelete.value,
-  });
 
-  $.ajax({
-    url: `${user.basePath}/api/file-upload`,
-    type: 'DELETE',
-    contentType: 'application/json',
-    data: data,
-    beforeSend: function (xhr) {
-      xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
-    },
-  }).done(() => {
-    router.go(0);
-  });
+function deleteFiles() {
+    const data = JSON.stringify({
+      documentId: documentId.value,
+      fileName: fileNameToDelete.value,
+      filePathToDelete: filePathToDelete.value
+    })
+
+    $.ajax({
+      url: `${user.basePath}/api/file-upload`,
+      type: 'DELETE',
+      contentType: 'application/json',
+      data: data,
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
+      },
+    })
+    .done(()=>{
+      router.go(0);
+    })
+  
 }
 
 onMounted(() => {
@@ -310,7 +314,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="h-screen w-3/4 overflow-y-auto p-8">
+  <div class="h-screen ">
+    <div class="flex w-full items-center justify-between text-4xl font-semibold">
+      <span>Documents</span>
+    </div>
     <!-- START DIV -->
     <div>
       <div>
@@ -321,15 +328,15 @@ onMounted(() => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <div>
-              <h3 class="font-bold">Note</h3>
-              <div class="text-xs">
+              <h3 class="font-bold text-2xl">Note</h3>
+              <div class="text-base">
                 Image upload only support only up to 5 images and supported formats - {{ imageRgx }}. (Max size of
                 <span class="font-semibold">{{ bytesToMb(maxImageSize) }}</span> each)
               </div>
-              <div class="text-xs">
+              <div class="text-base">
                 PDF upload only support only up to 2 pdfs. (Max size of <span class="font-semibold">{{ bytesToMb(maxPdfSize) }}</span> each)
               </div>
-              <div class="text-xs">
+              <div class="text-base">
                 Video upload only support only up to 1 video and supported formats - {{ videoRgx }}. (Max size of <span class="font-semibold">{{ bytesToMb(maxVideoSize) }}</span
                 >)
               </div>
@@ -365,12 +372,12 @@ onMounted(() => {
         </div>
         <!-- OK -->
         <!-- DRAG AND DROP -->
-        <div id="dropZone" class="card m-auto my-4 h-72 w-3/4 border border-dashed border-gray-600 bg-base-100 shadow-xl" @dragover="onDrag" @drop="onDrop">
+        <div id="dropZone" class="card m-auto my-4 h-96 w-3/4 border border-dashed border-gray-600 bg-base-100 shadow-xl" @dragover="onDrag" @drop="onDrop">
           <div class="card-body">
             <h2 class="card-title">Drag and Drop file here</h2>
             <p>
-              Or you can
-              <label for="file-input">Choose File</label>
+              OR CLICK to
+              <label for="file-input">Choose Files</label>
               <input type="file" id="file-input" multiple @change="onInsert" />
             </p>
 
@@ -535,7 +542,9 @@ onMounted(() => {
                     </div>
                     <div>
                       <iframe :src="user.basePath + '/' + pdf" frameborder="0" class="h-[720px] w-full"></iframe>
-                      Filename: {{ getFileName(pdf) }}
+                      <div class="text-wrap break-words"> 
+                        {{ getFileName(pdf) }}
+                      </div>
                     </div>
                   </div>
 
@@ -578,7 +587,10 @@ onMounted(() => {
                     </div>
                     <div>
                       <img :src="user.basePath + '/' + image" alt="" class="shadow-[rgba(50,_50,_105,_0.15)_0px_2px_5px_0px,_rgba(0,_0,_0,_0.05)_0px_1px_1px_0px]" />
-                      Filename: {{ getFileName(image) }}
+                      <div class="text-wrap break-words"> 
+                        {{getFileName(image)}}
+                      </div>
+                      
                     </div>
                   </div>
                   <!-- <div class="max-h-64 max-w-64">
@@ -636,7 +648,10 @@ onMounted(() => {
                       <video controls class="h-96 w-full">
                         <source :src="user.basePath + '/' + video" />
                       </video>
-                      {{ getFileName(video) }}
+                      <div class="text-wrap break-words"> 
+                        {{ getFileName(video) }}
+                      </div>
+                  
                     </div>
                   </div>
                 </div>

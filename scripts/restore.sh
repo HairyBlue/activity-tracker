@@ -149,11 +149,23 @@ function restoreAttachements() {
    file_path=$(find $prefix -mindepth 4 -maxdepth 4 -type d)
 
    if [[ ! -z $file_path ]]; then
+      count=0
       for i in $file_path;
       do
          if [[ ! -z $i ]]; then
             echo $i
             loopFiles $i $prefix $server_dist
+
+            count=$((count + 1))
+
+            if ((count % 10 == 0)); then
+                echo "Sleeping for 1 second after processing 10 files..."
+                sleep 1  # Sleep for 1 second after every 10 files
+            else 
+               echo "Sleeping for 0.1 second on processing 10 files..."
+                sleep 0.1  # Sleep for 1 second after every 10 files
+            fi
+
          fi
       done
    fi

@@ -134,7 +134,7 @@ function isCurrentSelection(prout: string): boolean {
               <span class="ms-3 flex-1 whitespace-nowrap">Manage</span>
             </RouterLink>
           </li>
-          <li v-if="levelAllowed('WEBMASTER|ADMIN')">
+          <li v-if="levelAllowed('WEBMASTER')">
             <RouterLink
               to="/server-health"
               :class="isCurrentSelection('/server-health') ? 'bg-gray-200' : ''"

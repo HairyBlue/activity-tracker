@@ -13,6 +13,7 @@ const userPref = userPreference();
 
 const schoolYears = ref<any>([]);
 const activitySchoolYear = ref<string>(userPref.getValue('clubOrg.activitySchoolYear', sdata.currentYearStr));
+const activityStatus = ref<"APPROVED" | "DISAPPROVED" | "PENDING">(userPref.getValue('clubOrg.activityStatus', 'APPROVED'));
 const activitySemester = ref<'1' | '2'>(userPref.getValue('clubOrg.semester', '1'));
 
 const data = ref<any[]>([]);
@@ -28,7 +29,7 @@ function fetchData() {
 
   setTimeout(() => {
     $.ajax({
-      url: `${user.basePath}/api/club-org/${activitySchoolYear.value}/${activitySemester.value}`,
+      url: `${user.basePath}/api/club-org/${activitySchoolYear.value}/${activitySemester.value}/${activityStatus.value}`,
       method: 'GET',
       contentType: 'application/json',
       beforeSend: function (xhr) {
@@ -63,7 +64,7 @@ async function onSelect(idx: number) {
 //   chartLabel.value = [];
 // }
 
-watch([activitySchoolYear, activitySemester], ([new_activitySchoolYear, new_activitySemester], [old_activitySchoolYear, old_activitySemester]) => {
+watch([activitySchoolYear, activitySemester, activityStatus], ([new_activitySchoolYear, new_activitySemester, new_activityStatus], [old_activitySchoolYear, old_activitySemester, old_activityStatus]) => {
   if (new_activitySchoolYear !== old_activitySchoolYear) {
     fetchData();
     userPref.setValue('clubOrg.activitySchoolYear', new_activitySchoolYear);
@@ -74,6 +75,11 @@ watch([activitySchoolYear, activitySemester], ([new_activitySchoolYear, new_acti
     userPref.setValue('clubOrg.semester', new_activitySemester);
   }
 
+  if (new_activityStatus != old_activityStatus) {
+    fetchData();
+    userPref.setValue('clubOrg.activityStatus', new_activityStatus);
+  }
+  
 });
 
 onMounted(() => {
@@ -93,6 +99,15 @@ onMounted(() => {
         <h2 class="p-1 text-lg font-semibold">Club and Organization</h2>
 
         <div class="flex gap-2">
+          <div>
+            <select class="select select-primary w-full max-w-xs rounded-none" v-model="activityStatus">
+              <option disabled selected value="">Status</option>
+              <option value="APPROVED">Approved</option>
+              <option value="DISAPPROVED">Disapproved</option>
+              <option value="PENDING">Pending</option>
+            </select>
+          </div>
+
           <div>
             <select class="select select-primary w-full max-w-xs rounded-none" v-model="activitySchoolYear">
               <option disabled selected value="">School Year</option>

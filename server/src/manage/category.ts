@@ -19,6 +19,12 @@ function register() {
     res.json({ result: data });
   });
 
+  router.get("/category-archive", async function (req, res) {
+    const data = await show("SELECT * FROM Category Where categoryArchive = 1", [])
+    
+    res.status(200);
+    res.json({ result: data });
+  });
 
 // ***************************************************************************************************************************************************
   router.post("/category", async function (req, res) {
@@ -93,7 +99,27 @@ function register() {
     await update("UPDATE Activity SET activityArchive = 1 WHERE category_id = ?", [categoryId]);
     await update("UPDATE Category SET categoryArchive = 1 WHERE categoryId = ?", [categoryId]);
   
-    logger.info(`category was delete by ${user}`);
+    logger.info(`category was archive by ${user.username}`);
+    res.status(200);
+    res.json({ message: "success" });
+  });
+
+  router.patch("/category-restore/:id", async function (req: express.Request, res: express.Response) {
+    const user_uuid = (req as GetUserRequest).user_uuid;
+    const userAccess: any = await getAccessLevel(user_uuid);
+    const user = userAccess.user;
+    const approve =  approveAccess(userAccess.level, "WEBMASTER|ADMIN");
+
+    if (!approve) {
+      return res.status(403).json({error: "Forbidden"})
+    }
+
+    const categoryId = Number(req.params.id);
+
+    await update("UPDATE Activity SET activityArchive = 0 WHERE category_id = ?", [categoryId]);
+    await update("UPDATE Category SET categoryArchive = 0 WHERE categoryId = ?", [categoryId]);
+  
+    logger.info(`category was restore by ${user.username}`);
     res.status(200);
     res.json({ message: "success" });
   });
