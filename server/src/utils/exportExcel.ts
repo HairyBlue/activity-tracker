@@ -28,7 +28,7 @@ async function clubList() {
 
 
 async function appendData(category: string[], club: any, year: any, semester: any, activityStatus: any) {
-    const result: any = await show(`SELECT activityDisplayDate, activityName, categoryName from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE clubId = ? AND activitySchoolYear = ? AND activitySemester = ? AND activityStatus = ? AND activityArchive = 0 ORDER BY activityStartDateIso ASC`,
+    const result: any = await show(`SELECT activityDisplayDate, activityName, categoryName from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE clubId = ? AND activitySchoolYear = ? AND activitySemester = ? AND activityStatus = ? AND clubArchive = 0 AND categoryArchive = 0 ORDER BY activityStartDateIso ASC`,
         [club.clubId, year, semester, activityStatus ]);
     const data: any[] = []
 
@@ -55,7 +55,7 @@ async function allActivies(category: string[], clubs: any, year: any, semester: 
     for (let club of clubs) {
         const clubCon = club.clubAcronym.length > 0 ? `${club.clubName} (${club.clubAcronym})` : club.clubName
         let data: any[] = [clubCon]
-        const result: any = await show(`SELECT Count(*) as count, categoryName from Activity LEFT JOIN Club ON club_id = clubId LEFT JOIN Category ON category_id = categoryId WHERE clubId = ? AND activitySchoolYear = ? AND activitySemester = ? AND activityStatus = ? AND activityArchive = 0 GROUP BY categoryName`,
+        const result: any = await show(`SELECT Count(*) as count, categoryName from Activity LEFT JOIN Club ON club_id = clubId LEFT JOIN Category ON category_id = categoryId WHERE clubId = ? AND activitySchoolYear = ? AND activitySemester = ? AND activityStatus = ? AND clubArchive = 0 AND categoryArchive = 0 GROUP BY categoryName`,
         [club.clubId, year, semester, activityStatus ]);
     
 

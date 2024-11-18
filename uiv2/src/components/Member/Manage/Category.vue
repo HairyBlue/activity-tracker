@@ -179,11 +179,11 @@ onMounted(() => {
   <div class="flex">
     <div class="h-screen w-1/2 overflow-auto border border-r-gray-300 p-2">
       <div>
-        <h2 class="text-base font-semibold leading-7 text-gray-900">Category Form</h2>
+        <h2 class="text-base font-semibold leading-7 text-gray-900">Developmental Category Form</h2>
         <p class="mt-1 text-sm leading-6 text-gray-600">Add details below</p>
         <div class="mt-4 flex flex-col gap-x-6 gap-y-4">
           <div>
-            <label for="activity-name" class="block text-base font-medium leading-6 text-gray-900">Category Name</label>
+            <label for="activity-name" class="block text-base font-medium leading-6 text-gray-900">Developmental Category Name</label>
             <div class="mt-2">
               <input type="text" placeholder="Name" class="input input-bordered w-full" v-model="categoryName" />
             </div>
@@ -236,7 +236,7 @@ onMounted(() => {
           <thead>
             <tr class="border-b border-gray-400 text-base font-semibold">
               <th>No.</th>
-              <th>Category Name</th>
+              <th>Developmental Category Name</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -267,7 +267,7 @@ onMounted(() => {
           <thead>
             <tr class="border-b border-gray-400 text-base font-semibold">
               <th>No.</th>
-              <th>Category Name</th>
+              <th>Developmental Category Name</th>
               <th>Action</th>
             </tr>
           </thead>

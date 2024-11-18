@@ -12,7 +12,7 @@ const queryCategory =
   " " +
   "LEFT JOIN Category on category_id = categoryId" +
   " " +
-  "WHERE club_id = ? AND activitySchoolYear = ? AND activitySemester = ?  AND activityArchive = 0 AND activityStatus = ?" +
+  "WHERE club_id = ? AND activitySchoolYear = ? AND activitySemester = ?  AND categoryArchive = 0 AND activityStatus = ?" +
   " " +
   "GROUP BY category_id";
 
@@ -21,7 +21,7 @@ const queryCategoryMonth =
   " " +
   "LEFT JOIN Category ON category_id = categoryId" +
   " " +
-  "WHERE club_id = ?  AND activitySchoolYear = ? AND activitySemester = ?  AND activityArchive = 0 AND activityStatus = ?" +
+  "WHERE club_id = ?  AND activitySchoolYear = ? AND activitySemester = ?  AND categoryArchive = 0 AND activityStatus = ?" +
   " " +
   "GROUP BY categoryId, MONTH(activityStartDateIso)";
 

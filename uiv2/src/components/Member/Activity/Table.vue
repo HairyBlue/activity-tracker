@@ -196,7 +196,7 @@ onMounted(() => {
       <div class="flex flex-wrap gap-1">
         <!-- Search -->
         <div>
-          <input type="text" placeholder="Search here" class="input input-bordered input-primary w-full max-w-xs rounded-none" v-model="searchFilter" />
+          <input type="text" placeholder="Search Activity Name Here" class="input input-bordered input-primary w-full max-w-xs rounded-none" v-model="searchFilter" />
         </div>
        
         <!-- <div>

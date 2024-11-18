@@ -137,7 +137,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="show" class="p-4">
+  <div v-if="show" class="p-4" data-testid="overview-section">
     <section class="card rounded-none bg-base-100 p-2 shadow-xl">
       <!-- SCHOOL YEAR -->
       <div class="flex items-center justify-end gap-4">

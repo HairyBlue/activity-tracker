@@ -8,7 +8,7 @@ import { cleanQuery } from "./helpers/svcfunc";
 
 const router = express.Router();
 
-const queryActCount = "Select COUNT(DISTINCT(activity_same_record_uuid)) as count from Activity where club_id = ? AND activitySchoolYear = ? AND activitySemester = ? AND activityStatus = ? AND activityArchive = 0";
+const queryActCount = "Select COUNT(DISTINCT(activity_same_record_uuid)) as count from Activity LEFT JOIN Club ON club_id = clubId LEFT JOIN Category ON category_id = categoryId where club_id = ? AND activitySchoolYear = ? AND activitySemester = ? AND activityStatus = ? AND clubArchive = 0 AND categoryArchive = 0";
 const queryPCT = "SELECT targetActivityNumber FROM TargetActivity WHERE club_id = ? AND targetActivityYear = ? AND targetActivitySemester = ?";
 const queryTarget = "SELECT COUNT(*) as count FROM TargetActivity WHERE club_id = ? AND targetActivityYear = ? AND targetActivitySemester = ?";
 const queryLatest = "SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ? AND activitySemester = ? AND activityArchive = 0 ORDER BY activityStartDateIso ASC LIMIT 20 OFFSET 0"
@@ -43,7 +43,8 @@ function queryAll( schoolYear: string, semester: string, orderBy: "ASC" | "DESC"
     LEFT JOIN Category ON category_id = categoryId
     WHERE activitySchoolYear = '${schoolYear}'
     AND activitySemester = '${semester}'
-    AND activityArchive = 0
+    AND clubArchive = 0
+    AND categoryArchive = 0
     ORDER BY activityStartDateIso ${orderBy}
     LIMIT ${limit}
     OFFSET ${offset}

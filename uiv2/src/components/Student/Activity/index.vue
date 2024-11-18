@@ -13,7 +13,7 @@ function onShowFormClick() {
 </script>
 
 <template>
-  <div class="w-full h-screen px-4">
+  <div class="w-full h-screen px-4"  data-testid='student-activity-section'>
     <button type="button" @click="onShowFormClick" class="btn btn-accent my-4">  
       {{ showForm ? "Hide Form Submission " : "Show Form Submission "  }}
     </button>

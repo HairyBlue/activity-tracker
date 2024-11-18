@@ -90,7 +90,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="h-screen w-full p-1">
+  <div class="h-screen w-full p-1" data-testid='club-organizatons-section'>
     <section>
       <div class="flex justify-between gap-2">
         <!-- SchoolYear -->

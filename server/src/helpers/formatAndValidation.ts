@@ -21,6 +21,8 @@ function validatePassword(password: string) {
 function validateDates(startDate: string, endDate: string, activitySchoolYear: string) {
   if (startDate.length <= 0 && endDate.length <= 0) return false;
 
+  if (!startDate || !endDate || !activitySchoolYear) return false;
+
   const start = DateTime.fromISO(startDate);
   const end = DateTime.fromISO(endDate);
 
@@ -32,9 +34,9 @@ function validateDates(startDate: string, endDate: string, activitySchoolYear: s
 
   // console.log(start.toFormat("MM/dd/yyyy · h:mm a"), start.year.toString(), end.year.toString());
 
-  
+
   if (
-    !activitySchoolYear.includes(start.year.toString()) &&
+    !activitySchoolYear.includes(start.year.toString()) ||
     !activitySchoolYear.includes(end.year.toString())
   ) {
     return false;
@@ -42,7 +44,10 @@ function validateDates(startDate: string, endDate: string, activitySchoolYear: s
 
   if ( 
     // startMonth === endMonth &&
-    start.day > end.day
+    start.day > end.day ||
+    (start.day === end.day && start.hour > end.hour) ||
+    (start.day === end.day && start.hour === end.hour && start.minute > end.minute) || 
+    (start.day === end.day && start.hour === end.hour && start.minute === end.minute && start.second > end.second)
   ) {
     return false;
   }

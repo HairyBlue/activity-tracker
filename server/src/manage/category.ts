@@ -116,7 +116,7 @@ function register() {
 
     const categoryId = Number(req.params.id);
 
-    await update("UPDATE Activity SET activityArchive = 0 WHERE category_id = ?", [categoryId]);
+    // await update("UPDATE Activity SET activityArchive = 0 WHERE category_id = ?", [categoryId]);
     await update("UPDATE Category SET categoryArchive = 0 WHERE categoryId = ?", [categoryId]);
   
     logger.info(`category was restore by ${user.username}`);

@@ -42,7 +42,7 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div v-if="userRoles.length > 0" class="flex h-full w-full">
+  <div v-if="userRoles.length > 0" class="flex h-full w-full" data-testid='user-section'>
     <Form v-if="toTick" :userRoles="userRoles" :userFromEmits="userEmits"/>
     <Table :userRoles="userRoles" @user-emit="userEmit"/>
   </div>

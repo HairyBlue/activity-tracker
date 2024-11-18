@@ -32,7 +32,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="hasAccess" class="w-full">
+  <div v-if="hasAccess" class="w-full" data-testid='manage-section'>
     <section>
       <div class="border p-1">
         <!--  -->
@@ -50,7 +50,7 @@ onMounted(() => {
             :class="isCurrentSelection('/dashboard/manage/category') ? 'bg-[#1f2937] text-white' : ''"
             class="btn btn-outline ml-1 rounded-none border border-solid border-gray-400"
             id="category">
-            Category
+            Developmental Category
           </button>
         </RouterLink>
 

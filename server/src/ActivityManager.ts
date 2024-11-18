@@ -46,7 +46,8 @@ function queryAll( schoolYear: string, semester: string, orderBy: "ASC" | "DESC"
     LEFT JOIN Category ON category_id = categoryId
     WHERE activitySchoolYear = '${schoolYear}'
     AND activitySemester = '${semester}'
-    AND activityArchive = 0
+    AND clubArchive = 0
+    AND categoryArchive = 0
     ORDER BY activityStartDateIso ${orderBy}
     LIMIT ${limit}
     OFFSET ${offset}
@@ -84,7 +85,8 @@ function queryEach( ) {
     LEFT JOIN Club ON club_id = clubId
     LEFT JOIN Category ON category_id = categoryId
     WHERE activity_same_record_uuid = ?
-    AND activityArchive = 0
+    AND clubArchive = 0
+    AND categoryArchive = 0
   `
   const cleanedQuery = cleanQuery(query)
 
@@ -120,7 +122,8 @@ function queryClub( schoolYear: string, semester: string, orderBy: "ASC" | "DESC
     WHERE club_uuid = '${club_uuid}'
     AND activitySchoolYear = '${schoolYear}'
     AND activitySemester = '${semester}'
-    AND activityArchive = 0
+    AND clubArchive = 0
+    AND categoryArchive = 0
     ORDER BY activityStartDateIso ${orderBy}
     LIMIT ${limit}
     OFFSET ${offset}
@@ -157,7 +160,8 @@ function queryClubAndCategory( schoolYear: string, semester: string, orderBy: "A
     AND category_uuid = '${category_uuid}'
     AND activitySchoolYear = '${schoolYear}'
     AND activitySemester = '${semester}'
-    AND activityArchive = 0
+    AND clubArchive = 0
+    AND categoryArchive = 0
     ORDER BY activityStartDateIso ${orderBy}
     LIMIT ${limit}
     OFFSET ${offset}
@@ -195,12 +199,10 @@ function queryBySearch( schoolYear: string, semester: string, orderBy: "ASC" | "
     LEFT JOIN Club ON club_id = clubId
     LEFT JOIN Category ON category_id = categoryId
     WHERE activityName LIKE ? 
-    OR clubName LIKE ? 
-    OR clubAcronym LIKE ? 
-    OR categoryName LIKE ?
     AND activitySchoolYear = '${schoolYear}'
     AND activitySemester = '${semester}'
-    AND activityArchive = 0
+    AND clubArchive = 0
+    AND categoryArchive = 0
     ORDER BY activityStartDateIso ${orderBy}
     LIMIT ${limit}
     OFFSET ${offset}
@@ -236,7 +238,8 @@ function querySearchByClub( schoolYear: string, semester: string, orderBy: "ASC"
     AND club_id = '${club_id}'
     AND activitySchoolYear = '${schoolYear}'
     AND activitySemester = '${semester}'
-    AND activityArchive = 0
+    AND clubArchive = 0
+    AND categoryArchive = 0
     ORDER BY activityStartDateIso ${orderBy}
     LIMIT ${limit}
     OFFSET ${offset}
@@ -369,16 +372,16 @@ class Activity {
     // return result
   }
 
-  async getBySearch(activityName: string, clubName: string,  clubAcronym: string,  categoryName: string) {
+  async getBySearch(activityName: string) {
     const query = queryBySearch(this.schoolYear, this.sem, this.orderBy, this.limit, this.offset)
-    const result =  await show(query, [activityName, clubName, clubAcronym, categoryName])
+    const result =  await show(query, [activityName])
     return groupSameRecordUuid(result);
     // return result
   }
 
   async getSearchByClub(activityName: string, categoryName: string, club_id: any) {
     const query = querySearchByClub(this.schoolYear, this.sem, this.orderBy, this.limit, this.offset, club_id)
-    const result =  await show(query, [activityName, categoryName])
+    const result =  await show(query, [activityName])
     return result
   }
 }
@@ -393,7 +396,7 @@ async function activityData(req: express.Request, res: express.Response ) {
     
     if (searchFilter.length > 0) {
       const search = '%' + searchFilter + '%';
-      result = await activity.getBySearch(search, search, search, search)
+      result = await activity.getBySearch(search)
     // } else if (club_uuid.length > 0 && category_uuid.length > 0) {
     //   result = await activity.getByCbCt(club_uuid, category_uuid);
     } else if (club_uuid.length > 0 ) {

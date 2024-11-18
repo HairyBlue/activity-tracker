@@ -121,7 +121,7 @@ function register() {
 
     const clubId = Number(req.params.id);
 
-    await update("UPDATE Activity SET activityArchive = 0 WHERE club_id = ?", [clubId]);
+    // await update("UPDATE Activity SET activityArchive = 0 WHERE club_id = ?", [clubId]);
     await update("UPDATE Club SET clubArchive = 0 WHERE clubId = ?", [clubId]);
 
     logger.info(`club was restore by ${user.username}`);

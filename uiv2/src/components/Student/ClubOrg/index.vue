@@ -92,7 +92,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="h-screen p-2">
+  <div class="h-screen p-2" data-testid='student-overview-section'>
     <section>
       <div class="flex justify-between gap-2">
         <!-- SchoolYear -->
