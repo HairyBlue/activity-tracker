@@ -198,14 +198,7 @@ onMounted(() => {
         <div>
           <input type="text" placeholder="Search Activity Name Here" class="input input-bordered input-primary w-full max-w-xs rounded-none" v-model="searchFilter" />
         </div>
-       
-        <!-- <div>
-          <select class="select select-primary w-full max-w-xs rounded-none" v-model="category_uuid">
-            <option disabled selected value="">Category</option>
-            <option v-for="category in categories" :value="category.category_uuid" :id="category.category_uuid">{{ category.categoryName }}</option>
-          </select>
-        </div> -->
-    
+      
         <div>
           <select class="select select-primary w-full max-w-xs rounded-none" v-model="club_uuid">
             <option disabled selected value="">Club</option>
@@ -270,13 +263,17 @@ onMounted(() => {
               <td class="align-top">{{ data["activities"][0].activityName }}</td>
               <td class="align-top">
                 <div v-for="category of data['categories']">
-                  {{ category.name }}, 
+                  <div class="p-1 bg-slate-200 mb-1">
+                    {{ category.name }}, 
+                  </div>
                 </div>
               </td>
               <td class="align-top">{{ data["activities"][0].activitySemester }}</td>
               <td class="align-top">              
-                <div v-for="attendees of data['activities'][0].activityDisplayDate.split('---')">
-                  {{ attendees }}, 
+                <div v-for="date of data['activities'][0].activityDisplayDate.split('---')">
+                  <div class="p-1 bg-slate-200 mb-1">
+                    {{ date }}, 
+                  </div>
                 </div>
               </td>
 
@@ -284,7 +281,9 @@ onMounted(() => {
               <td class="align-top">{{ data["activities"][0].activityNumberParticipants }}</td>
               <td class="align-top">
                 <div v-for="attendees of JSON.parse(data['activities'][0].activityPersonel)">
-                  {{ attendees }}, 
+                  <div class="p-1 bg-slate-200 mb-1">
+                    {{ attendees }}, 
+                  </div>
                 </div>
               </td>
 
@@ -306,13 +305,6 @@ onMounted(() => {
           </tbody>
         </table>
       </div>
-      <!-- <div >
-        <div class="mt-16 text-center text-4xl font-semibold text-gray-600">
-          <div>
-            <span>No data currently showed</span>
-          </div>
-        </div>
-      </div> -->
       <!-- Pagination -->
       <div class="mt-10">
         <div class="flex items-center justify-center gap-2">

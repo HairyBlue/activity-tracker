@@ -123,7 +123,7 @@ onMounted(()=>{
 <template>
   <div data-testid="login-page">
     <div id="login" class="flex h-screen w-screen flex-col justify-center">
-      <div class="card m-auto flex bg-base-100 shadow-xl lg:card-side max-lg:block sm:w-1/2">
+      <div class="card m-auto flex bg-base-100 shadow-xl lg:card-side max-lg:block lg:1/2">
         <!--  -->
         <div class="flex justify-center border-r-gray-200 px-2 py-4 max-md:border">
           <RouterLink to="/" class="flex items-center space-x-3 rtl:space-x-reverse">

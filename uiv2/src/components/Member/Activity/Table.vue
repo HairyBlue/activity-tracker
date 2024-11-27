@@ -247,7 +247,7 @@ onMounted(() => {
 
       <!-- TABLE -->
       <div class="h-full overflow-x-auto">
-        <table class="table text-sm">
+        <table class="table text-xs">
           <!-- head -->
           <thead>
             <tr class="text-base">
@@ -270,13 +270,17 @@ onMounted(() => {
               <td class="align-top">{{ data["activities"][0].activityName }}</td>
               <td class="align-top">
                 <div v-for="category of data['categories']">
-                  {{ category.name }}, 
+                  <div class="p-1 bg-slate-200 mb-1">
+                    {{ category.name }}, 
+                  </div>
                 </div>
               </td>
               <td class="align-top">{{ data["activities"][0].activitySemester }}</td>
               <td class="align-top">              
-                <div v-for="attendees of data['activities'][0].activityDisplayDate.split('---')">
-                  {{ attendees }}, 
+                <div v-for="date of data['activities'][0].activityDisplayDate.split('---')">
+                  <div class="p-1 bg-slate-200 mb-1">
+                    {{ date }}, 
+                  </div>
                 </div>
               </td>
 
@@ -284,7 +288,9 @@ onMounted(() => {
               <td class="align-top">{{ data["activities"][0].activityNumberParticipants }}</td>
               <td class="align-top">
                 <div v-for="attendees of JSON.parse(data['activities'][0].activityPersonel)">
-                  {{ attendees }}, 
+                  <div class="p-1 bg-slate-200 mb-1">
+                    {{ attendees }}, 
+                  </div>
                 </div>
               </td>
 
