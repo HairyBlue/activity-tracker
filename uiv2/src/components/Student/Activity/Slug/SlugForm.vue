@@ -108,9 +108,9 @@ function selectedAllCategory() {
 }
 
 
-function status(stat: "APPROVED" | "DISAPPROVED" | "PENDING") {
-  activityStatus.value = stat;
-}
+// function status(stat: "APPROVED" | "DISAPPROVED" | "PENDING") {
+//   activityStatus.value = stat;
+// }
 
 function checkBefore() {
   const vars = [activityName, activityNotes, activityStartDateIso, activityEndDateIso, activitySemester, activitySchoolYear];
@@ -325,6 +325,7 @@ onBeforeMount(() => {
               Status: <span class="rounded text-red-600">Disapproved</span>
               <br />
               <span class="italic text-xl">{{ activityStatusTimeStamp }}</span>
+              <textarea readonly class="textarea textarea-bordered w-full h-52" placeholder="Leave a comment here" v-model="activityComments"></textarea>
             </div>
             <div v-else-if="activityStatus == 'PENDING'">
               Status: <span class="rounded text-yellow-400">Pending</span>
@@ -495,41 +496,6 @@ onBeforeMount(() => {
             <label for="activity-name" class="block text-lg font-semibold leading-6 text-gray-900">No. of Participants</label>
             <div class="mt-2">
               <input type="number" placeholder="Enter No. of Participants" class="input input-bordered w-full" v-model="activityNumberParticipants" />
-            </div>
-          </div>
-
-            
-          <div class="mt-10" v-if="levelAllowed('WEBMASTER|ADMIN|STAFF')">
-            <hr class="border-2">
-            <br>
-            <div>
-              <div>
-                <span class="text-2xl font-semibold leading-6 text-gray-900">Status</span>
-                <span class="text-lg font-medium leading-6 text-gray-900 italic"> (By default: Pending)</span>
-              </div>
-
-              <div class="flex gap-4 items-center mt-2">
-                <div class="flex items-center">
-                  <input id="radio-yes" type="radio" name="radio-1" class="radio" :value="1" @change="status('APPROVED')" :checked="activityStatus == 'APPROVED'"/>
-                  <label for="" class="text-green-800 font-semibold ml-2">Approved</label>
-                </div>
-                |
-                <div class="flex items-center">
-                  <input id="radio-no" type="radio" name="radio-1" class="radio " :value="0" @change="status('DISAPPROVED')" :checked="activityStatus == 'DISAPPROVED'"/>
-                  <label for="" class="text-red-600 font-semibold ml-2">Disapproved</label>
-                </div>
-                |
-                <div class="flex items-center">
-                  <input id="radio-no" type="radio" name="radio-1" class="radio" :value="0" @change="status('PENDING')" :checked="activityStatus == 'PENDING'" />
-                  <label for="" class="text-yellow-500 font-semibold ml-2">Pending</label>
-                </div>
-              </div>
-            </div>
-
-            <div v-if="activityStatus == 'DISAPPROVED'">
-              <div class="mt-2">
-                <textarea class="textarea textarea-bordered w-full h-52" placeholder="Leave a comment here" v-model="activityComments"></textarea>
-              </div>
             </div>
           </div>
 
