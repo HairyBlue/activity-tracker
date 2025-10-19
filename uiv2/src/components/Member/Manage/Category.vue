@@ -9,6 +9,7 @@ const user = userStore();
 const router = useRouter();
 
 const data = ref<any[]>([]);
+const dataArchive = ref<any[]>([]);
 const categoryId = ref<any>(null);
 const categoryName = ref<string>('');
 
@@ -40,6 +41,20 @@ function fetchData() {
       data.value = value.result;
     });
   }, 500);
+
+  setTimeout(() => {
+    $.ajax({
+      url: `${user.basePath}/api/manage/category-archive`,
+      method: 'GET',
+      contentType: 'application/json',
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
+      },
+    }).then((value) => {
+      dataArchive.value = value.result;
+    });
+  }, 500);
+
 }
 
 function postData() {
@@ -107,9 +122,39 @@ function archiveModal(category_id: number | null, cancel: boolean = false) {
   categoryId.value = category_id;
 }
 
+function restoreModal(category_id: number | null, cancel: boolean = false) {
+  if (cancel) {
+    categoryId.value = category_id;
+    return;
+  }
+
+  const modal1 = document.getElementById('restore_modal') as any;
+  modal1.showModal();
+
+  categoryId.value = category_id;
+}
+
 function archiveData() {
   $.ajax({
     url: `${user.basePath}/api/manage/category/${categoryId.value}`,
+    method: 'PATCH',
+    contentType: 'application/json',
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
+    },
+  })
+    .done(() => {
+      router.go(0);
+    })
+    .fail((jqXHR: any) => {
+      modalMessage.value = jqXHR.responseJSON.error;
+      enableModal();
+    });
+}
+
+function restoreData() {
+  $.ajax({
+    url: `${user.basePath}/api/manage/category-restore/${categoryId.value}`,
     method: 'PATCH',
     contentType: 'application/json',
     beforeSend: function (xhr) {
@@ -134,11 +179,11 @@ onMounted(() => {
   <div class="flex">
     <div class="h-screen w-1/2 overflow-auto border border-r-gray-300 p-2">
       <div>
-        <h2 class="text-base font-semibold leading-7 text-gray-900">Category Form</h2>
+        <h2 class="text-base font-semibold leading-7 text-gray-900">Developmental Category Form</h2>
         <p class="mt-1 text-sm leading-6 text-gray-600">Add details below</p>
         <div class="mt-4 flex flex-col gap-x-6 gap-y-4">
           <div>
-            <label for="activity-name" class="block text-base font-medium leading-6 text-gray-900">Category Name</label>
+            <label for="activity-name" class="block text-base font-medium leading-6 text-gray-900">Developmental Category Name</label>
             <div class="mt-2">
               <input type="text" placeholder="Name" class="input input-bordered w-full" v-model="categoryName" />
             </div>
@@ -160,7 +205,7 @@ onMounted(() => {
               </svg>
               <div>
                 <h3 class="text-xl font-bold">Note!</h3>
-                <div class="text-base">Before you make an update or delete a data. Please Read below.</div>
+                <div class="text-base">Before you make an update or archive a data. Please Read below.</div>
               </div>
             </div>
           </div>
@@ -172,8 +217,8 @@ onMounted(() => {
           </div>
           <div class="card w-full bg-base-100 shadow-xl">
             <div class="card-body">
-              <h2 class="card-title underline">Deleting data</h2>
-              <p>When Deleting all associates to this data will be deleted. This can be recover on archive section.</p>
+              <h2 class="card-title underline">Archiving data</h2>
+              <p>When Archiving all associates to this data will be archive also. This can be recover on archive section.</p>
             </div>
           </div>
         </div>
@@ -191,7 +236,7 @@ onMounted(() => {
           <thead>
             <tr class="border-b border-gray-400 text-base font-semibold">
               <th>No.</th>
-              <th>Category Name</th>
+              <th>Developmental Category Name</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -204,13 +249,45 @@ onMounted(() => {
               <td>
                 <div class="flex gap-4">
                   <button class="btn btn-warning" @click="edit(d.categoryId)">Edit</button>
-                  <button class="btn btn-error" @click="archiveModal(d.categoryId)">Delete</button>
+                  <button class="btn btn-error" @click="archiveModal(d.categoryId)">Archive</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <br>
+        <br>
+        <hr class="border-2">
+          <h2 class="text-4xl font-semibold text-center"> Archives </h2>
+        <hr class="border-2">
+
+        <table class="table">
+          <!-- head -->
+          <thead>
+            <tr class="border-b border-gray-400 text-base font-semibold">
+              <th>No.</th>
+              <th>Developmental Category Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- row 1 -->
+            <tr v-for="(d, idx) in dataArchive" class="border-b border-gray-300 text-base font-semibold">
+              <th>{{ idx + 1 }}.</th>
+              <td>{{ d.categoryName }}</td>
+
+              <td>
+                <div class="flex gap-4">
+                  <button class="btn btn-error" @click="restoreModal(d.categoryId)">Restore</button>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+
     </div>
     <!-- <button class="btn" onclick="my_modal_1.showModal()">open modal</button> -->
     <dialog id="my_modal_1" class="modal">
@@ -229,12 +306,27 @@ onMounted(() => {
     <dialog id="archive_modal" class="modal">
       <div class="modal-box">
         <!-- <h3 class="text-lg font-bold">Hello!</h3> -->
-        <p class="py-4 text-xl font-semibold text-red-600">Are you sure that want to delete this data?</p>
+        <p class="py-4 text-xl font-semibold text-red-600">Are you sure that want to archive this data?</p>
         <div class="modal-action">
           <form method="dialog" class="flex gap-2">
             <!-- if there is a button in form, it will close the modal -->
             <button class="btn" @click="archiveModal(null, true)">No</button>
             <button class="btn btn-error" @click="archiveData()">Yes</button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+
+
+    <dialog id="restore_modal" class="modal">
+      <div class="modal-box">
+        <!-- <h3 class="text-lg font-bold">Hello!</h3> -->
+        <p class="py-4 text-xl font-semibold text-red-600">Are you sure that want to <span class="font-semibold">restore</span> this archive data?</p>
+        <div class="modal-action">
+          <form method="dialog" class="flex gap-2">
+            <!-- if there is a button in form, it will close the modal -->
+            <button class="btn" @click="restoreModal(null, true)">No</button>
+            <button class="btn btn-error" @click="restoreData()">Yes</button>
           </form>
         </div>
       </div>

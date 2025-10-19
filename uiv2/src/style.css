@@ -97,6 +97,7 @@ a:hover {
   border: 1px dashed black;
 }
 
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

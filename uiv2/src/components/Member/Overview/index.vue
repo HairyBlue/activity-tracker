@@ -16,8 +16,8 @@ const userPref = userPreference();
 const schoolYears = ref<any>([]);
 const activitySchoolYear = ref<string>(userPref.getValue('overview.activitySchoolYear', sdata.currentYearStr));
 const activitySemester = ref<'1' | '2'>(userPref.getValue('overview.semester', '1'));
-const activityStatus = ref<'0' | '1'>(userPref.getValue('clubOrg.activityStatus', '1'));
-const chartType = ref<'bar' | 'line'>(userPref.getValue('clubOrg.chartType', 'bar'));
+const activityStatus = ref<"APPROVED" | "DISAPPROVED" | "PENDING">(userPref.getValue('overview.activityStatus', 'APPROVED'));
+const chartType = ref<'bar' | 'line'>(userPref.getValue('overview.chartType', 'bar'));
 
 const chartLabel = ref<string[]>([]);
 const chartData = ref<number[]>([]);
@@ -25,6 +25,22 @@ const chartData = ref<number[]>([]);
 const latest20Activity = ref<any>(null);
 
 const show = ref<boolean>(false);
+
+function groupActivity(data: any) {
+
+const shalowCopy = Object.assign({}, data);
+ for (let key in shalowCopy) {
+   shalowCopy[key]["categories"] = [];
+   for (let activity of shalowCopy[key]["activities"] ) {
+       shalowCopy[key]["categories"].push({
+         'uuid': activity.category_uuid,
+         'name': activity["categoryName"]
+       })
+   }
+ }
+
+ return shalowCopy;
+}
 
 function co(co: any) {
   chartLabel.value = [];
@@ -59,7 +75,8 @@ function fetchData() {
         xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
       },
     }).then((value) => {
-      latest20Activity.value = value.data.latest;
+      
+      latest20Activity.value = groupActivity(value.data.latest);
       co(value.data.co);
 
       setTimeout(() => {
@@ -101,7 +118,7 @@ watch(
 );
 
 function exportExcel() {
-    const fileName = ref<string>(`Clubs, Organizations And Colleges Activities For ${activitySemester.value == '1'? 'First' : 'Second'} Semester SY ${activitySchoolYear.value} [${activityStatus.value == '1' ? 'APPROVED' : 'PENDING'}]`)
+    const fileName = ref<string>(`Clubs, Organizations And Colleges Activities For ${activitySemester.value == '1'? 'First' : 'Second'} Semester SY ${activitySchoolYear.value} [${activityStatus.value}]`)
     const link = document.createElement('a');
     link.href =  `${user.basePath}/export/excel?year=${activitySchoolYear.value}&semester=${activitySemester.value}&filename=${fileName.value}&activityStatus=${activityStatus.value}`
     link.setAttribute("_target", "blank")
@@ -120,7 +137,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="show" class="p-4">
+  <div v-if="show" class="p-4" data-testid="overview-section">
     <section class="card rounded-none bg-base-100 p-2 shadow-xl">
       <!-- SCHOOL YEAR -->
       <div class="flex items-center justify-end gap-4">
@@ -128,8 +145,9 @@ onMounted(() => {
         <div>
           <select class="select select-bordered w-full max-w-xs rounded-none" v-model="activityStatus">
             <option disabled selected value="">Status</option>
-            <option value="1">Approved</option>
-            <option value="0">Pending</option>
+            <option value="APPROVED">Approved</option>
+            <option value="DISAPPROVED">Disapproved</option>
+            <option value="PENDING">Pending</option>
           </select>
         </div>
 
@@ -171,7 +189,7 @@ onMounted(() => {
     </section>
 
     <section class="card mt-8 rounded-none bg-base-100 shadow-xl">
-      <Table v-if="latest20Activity && latest20Activity.length > 0" :latest20Activity="latest20Activity" />
+      <Table  :latest20Activity="latest20Activity" />
     </section>
   </div>
   <div v-else>

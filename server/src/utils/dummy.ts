@@ -28,8 +28,8 @@ async function initialize() {
 
 function activityDateInit() {
  
-  const startDate = date.fromFormat("01-01-2024", "dd-MM-yyyy");
-  const endDate = date.fromFormat("31-12-2024", "dd-MM-yyyy");
+  const startDate = date.fromFormat("01-01-2024 00:00:00", "dd-MM-yyyy HH:mm:ss");
+  const endDate = date.fromFormat("31-12-2024 23:59:59", "dd-MM-yyyy HH:mm:ss");
 
   const activityStartDateIso: any = startDate
   .plus({ days: Math.floor(Math.random() * (endDate.diff(startDate, "days").days + 1)) })
@@ -74,12 +74,15 @@ async function dummyActivity() {
             const dateInit =  activityDateInit();
 
             const fakeVenue = faker.location.secondaryAddress();
-            const options = ["FACE TO FACE", "ONLINE", "HYBRID"];
+            const options = ["On-Campus", "Off-Campus", "Online"];
             const randomModality = options[Math.floor(Math.random() * options.length)];
-            const activityStatus = Math.floor(Math.random() * 2);
+
+            const activityStatus = ["APPROVED", "DISAPPROVED", "PENDING"]
+            const randomStatus = activityStatus[Math.floor(Math.random() * options.length)];
+
             let randomComments = faker.lorem.sentence();
 
-            if (activityStatus == 1) {
+            if (randomStatus == "APPROVED" || randomStatus == "PENDING") {
               randomComments = "";
             }
 
@@ -98,6 +101,7 @@ async function dummyActivity() {
                 INSERT INTO Activity 
                 (
                   activity_uuid,
+                  activity_same_record_uuid,
                   activityName,
                   activityNotes,
                   category_id,
@@ -113,8 +117,9 @@ async function dummyActivity() {
                   activityComments,
                   activityStatusTimeStamp
                 ) 
-                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
                 const params = [
+                  uuid.v4(),
                   uuid.v4(),
                   activityName,
                   activityNotes,
@@ -127,7 +132,7 @@ async function dummyActivity() {
                   dateInit.schoolYear,
                   fakeVenue,
                   randomModality,
-                  activityStatus,
+                  randomStatus,
                   randomComments,
                   dateFormmater
                 ];

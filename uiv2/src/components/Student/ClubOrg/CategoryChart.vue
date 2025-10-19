@@ -31,7 +31,7 @@ function createChart() {
       labels: label.value,
       datasets: [
         {
-          label: 'Number of activity per category',
+          label: 'Developmental Category',
           data: dataset.value,
           // backgroundColor: [
           //   'rgba(255, 99, 132, 0.2)',

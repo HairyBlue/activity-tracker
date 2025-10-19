@@ -69,35 +69,58 @@ describe("Check password format", function () {
 
 describe("Check date formats", function () {
   it("return false when start date and end date are empty", function () {
-    const result = validateDates("", "");
+    const result = validateDates("", "", "");
     expect(result).toBe(false);
   });
   it("return false when start date is empty", function () {
-    const result = validateDates("", "2024-08-15");
+    const result = validateDates("", "2024-11-17T16:20:00", "2024-2025");
     expect(result).toBe(false);
   });
   it("return false when end date is empty", function () {
-    const result = validateDates("2024-08-15", "");
+    const result = validateDates("2024-11-17T16:20:00", "", "2024-2025");
     expect(result).toBe(false);
   });
-  it("return false when year are not the same", function () {
-    const result = validateDates("2024-08-15", "2025-09-20");
+  it("return false when year are not included", function () {
+    const result = validateDates("2024-11-17T16:20:00", "2024-11-17T19:20:00", "");
     expect(result).toBe(false);
   });
     
-  it("return date 2024-08-15 to 15-Aug-2024", function () {
-    const result = validateDates("2024-08-15", "2024-08-15");
-    expect(result).toBe("15-Aug-2024");
+  it("return false when start day is greater than end day", function () {
+    const result = validateDates("2024-11-17T19:20:00", "2024-11-16T19:20:00", "2024-2025");
+    expect(result).toBe(false);
   });
-  it("return date 2024-08-15 and 2024-08-20 to August 15-20, 2024", function () {
-    const result = validateDates("2024-08-15", "2024-08-20");
-    expect(result).toBe("August 15-20, 2024");
+
+  it("return false when same day but start hour is greater than end hour", function () {
+    const result = validateDates("2024-11-17T19:20:00", "2024-11-17T18:20:00", "2024-2025");
+    expect(result).toBe(false);
   });
     
-  it("return date 2024-08-15 and 2024-09-20 to August-September, 2024", function () {
-    const result = validateDates("2024-08-15", "2024-09-20");
-    expect(result).toBe("August-September, 2024");
+  it("return false when same day,same hour but start minute is greate that end minute", function () {
+    const result = validateDates("2024-11-17T19:30:00", "2024-11-17T19:20:00", "2024-2025");
+    expect(result).toBe(false);
   });
+
+  it("return false when same day,same hour, same minute but start seconds is greate that end seconds", function () {
+    const result = validateDates("2024-11-17T19:20:30", "2024-11-17T19:20:00", "2024-2025");
+    expect(result).toBe(false);
+  });
+
+
+  it("return false when start year is not in school year 2024-2025", function () {
+    const result = validateDates("2026-11-17T19:00:30", "2024-11-17T19:00:00", "2024-2025");
+    expect(result).toBe(false);
+  });
+
+  it("return false when end year is not in school year 2024-2025", function () {
+    const result = validateDates("2024-11-17T19:00:00", "2026-11-17T19:00:00", "2024-2025");
+    expect(result).toBe(false);
+  });
+
+  it("return start and end date format MM/dd/yyyy · h:mm a --- MM/dd/yyyy · h:mm a | 2024-11-17T16:00:00 and 2024-11-17T19:00:00 ==> 11/17/2024 · 4:00 PM --- 11/17/2024 · 7:00 PM" , function () {
+    const result = validateDates("2024-11-17T16:00:00", "2024-11-17T19:00:00", "2024-2025");
+    expect(result).toBe("11/17/2024 · 4:00 PM --- 11/17/2024 · 7:00 PM");
+  });
+
 });
 
 describe("check jwtwebtoken to sign and verify", function () {

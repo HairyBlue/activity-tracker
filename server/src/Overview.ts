@@ -4,16 +4,72 @@ import * as express from "express";
 import { show } from "./db/dbcon";
 import { initAll } from "./commonData"
 import { overviewAll } from "./types";
+import { cleanQuery } from "./helpers/svcfunc";
 
 const router = express.Router();
 
-const queryActCount = "Select COUNT(*) as count from Activity where club_id = ? AND activitySchoolYear = ? AND activitySemester = ? AND activityStatus = ? AND activityArchive = 0";
+const queryActCount = "Select COUNT(DISTINCT(activity_same_record_uuid)) as count from Activity LEFT JOIN Club ON club_id = clubId LEFT JOIN Category ON category_id = categoryId where club_id = ? AND activitySchoolYear = ? AND activitySemester = ? AND activityStatus = ? AND clubArchive = 0 AND categoryArchive = 0";
 const queryPCT = "SELECT targetActivityNumber FROM TargetActivity WHERE club_id = ? AND targetActivityYear = ? AND targetActivitySemester = ?";
 const queryTarget = "SELECT COUNT(*) as count FROM TargetActivity WHERE club_id = ? AND targetActivityYear = ? AND targetActivitySemester = ?";
 const queryLatest = "SELECT * from Activity INNER JOIN Club ON club_id = clubId INNER JOIN Category ON category_id = categoryId WHERE YEAR(activityStartDateIso) = ? AND activitySemester = ? AND activityArchive = 0 ORDER BY activityStartDateIso ASC LIMIT 20 OFFSET 0"
 const queryListDataApproved = "Select * from Activity Club ON club_id = clubId  where activityStatus = 1"
 const queryListDataPending = "Select * from Activity Club ON club_id = clubId where activityStatus = 0"
 
+function queryAll( schoolYear: string, semester: string, orderBy: "ASC" | "DESC", limit: number, offset: number ) {
+  const query = `
+    Select
+      activity_uuid,
+      activity_same_record_uuid,
+      activityName,
+      activityNotes,
+      activityDisplayDate,
+      activityStartDateIso,
+      activityEndDateIso,
+      activitySemester,
+      activitySchoolYear,
+      activityVenue,
+      activityPersonel,
+      activityNumberParticipants,
+      activityModality,
+      activityStatus,
+      activityComments,
+      clubName,
+      clubAcronym,
+      categoryName,
+      category_uuid,
+      club_uuid
+    From Activity
+    LEFT JOIN Club ON club_id = clubId
+    LEFT JOIN Category ON category_id = categoryId
+    WHERE activitySchoolYear = '${schoolYear}'
+    AND activitySemester = '${semester}'
+    AND clubArchive = 0
+    AND categoryArchive = 0
+    ORDER BY activityStartDateIso ${orderBy}
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `
+  const cleanedQuery = cleanQuery(query)
+
+  return cleanedQuery;
+}
+
+
+function groupSameRecordUuid(rawData: any) {
+  const cleanData: any = {};
+
+  for (let data of rawData) {
+
+    if (!cleanData[data.activity_same_record_uuid]) {
+      cleanData[data.activity_same_record_uuid] = {};
+      cleanData[data.activity_same_record_uuid]["activities"] = [];
+    }
+
+    cleanData[data.activity_same_record_uuid]["activities"].push(data);
+  }
+
+  return cleanData;
+}
 
 class Overview {
   clubs: any[];
@@ -110,13 +166,20 @@ class Overview {
     this.all.data.target = obj;
   }
 
-  async latestActivity(query: string) {
-    const params = [this.activitySchoolYear, this.sem];
-    const result: any = await show(query, params);
+  // async latestActivity(query: string) {
+  //   const params = [this.activitySchoolYear, this.sem];
+  //   const result: any = await show(query, params);
 
-    if (result.length > 0) {
-      this.all.data.latest = result;
-    }
+  //   if (result.length > 0) {
+  //     this.all.data.latest = result;
+  //   }
+  // }
+
+  async latestActivity() {
+    const query = queryAll(this.activitySchoolYear, this.sem, "ASC", 20, 0)
+    const result =  await show(query, [])
+
+    this.all.data.latest = groupSameRecordUuid(result);
   }
 
   getData() {
@@ -138,7 +201,7 @@ async function processOverview(req: express.Request, activitySchoolYear: string,
   await overview.getClubOrg(queryActCount);
   // await overview.getPercentage(queryPCT);
   // await overview.tartgetActivity(queryTarget);
-  await overview.latestActivity(queryLatest);
+  await overview.latestActivity();
 
   return overview.getData();
 }

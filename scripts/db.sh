@@ -17,6 +17,7 @@ DB_USER="$MYSQL_DB_USER"
 DB_PASSWORD="$MYSQL_DB_PASSWORD"
 DB_NAME="$MYSQL_DB_NAME"
 
+CNF_PATH=$(echo $current_dir"/scripts/activity_tracker.cnf")
 
 # ########################################################################################
 migrate_path="./sqls/migrate.sql"
@@ -55,15 +56,17 @@ elif [[ ! -f $reset_path ]]; then
 elif [[ "$env" == "production" ]]; then
     if [[ "$1" == "--migrate" ]]; then
         # $migrate
-        mysql -u$DB_USER -p$DB_PASSWORD -D$DB_NAME < $migrate_path || exitf "Failed to migrate database $migrate_path, probably wrong credentials"
+        # mysql -u$DB_USER -p$DB_PASSWORD -D$DB_NAME < $migrate_path || exitf "Failed to migrate database $migrate_path, probably wrong credentials"
+        mysql --defaults-extra-file=$CNF_PATH < $migrate_path || exitf "Failed to migrate database $migrate_path, probably wrong credentials"
     elif [[ "$1" == "--seed" ]]; then
         cd "./server" #need to cd due the dependencies
         $seed
         cd "$current_dir" 
     else
         if [[ "$2" == "--webmaster-only" ]]; then
-            if [[ "$1" == "reset" ]]; then
-                mysql -u$DB_USER -p$DB_PASSWORD -D$DB_NAME < $reset_path || exitf "Failed to reset database $reset_path, probably wrong credentials"
+            if [[ "$1" == "reset" ]]; then                
+                # mysql -u$DB_USER -p$DB_PASSWORD -D$DB_NAME < $reset_path || exitf "Failed to reset database $reset_path, probably wrong credentials"
+                 mysql --defaults-extra-file=$CNF_PATH < $reset_path || exitf "Failed to reset database $reset_path, probably wrong credentials"
             elif [[ "$1" == "--dummy" ]]; then
                 cd "./server"
                 $dummy
@@ -81,9 +84,11 @@ elif [[ "$env" == "production" ]]; then
     fi
 elif [[ "$env" == "development" ]]; then
     if [[ "$1" == "--migrate" ]]; then
-        mysql -u$DB_USER -p$DB_PASSWORD -D$DB_NAME < $migrate_path || exitf "Failed to migrate database $migrate_path, probably wrong credentials"
+        # mysql -u$DB_USER -p$DB_PASSWORD -D$DB_NAME < $migrate_path || exitf "Failed to migrate database $migrate_path, probably wrong credentials"
+        mysql --defaults-extra-file=$CNF_PATH < $migrate_path || exitf "Failed to migrate database $migrate_path, probably wrong credentials"
     elif [[ "$1" == "--reset" ]]; then
-        mysql -u$DB_USER -p$DB_PASSWORD -D$DB_NAME < $reset_path || exitf "Failed to reset database $reset_path, probably wrong credentials"
+        # mysql -u$DB_USER -p$DB_PASSWORD -D$DB_NAME < $reset_path || exitf "Failed to reset database $reset_path, probably wrong credentials"
+        mysql --defaults-extra-file=$CNF_PATH < $reset_path || exitf "Failed to reset database $reset_path, probably wrong credentials"
     else
         cd "./server" #need to cd due the dependencies
         if [[ "$1" == "--dummy" ]]; then

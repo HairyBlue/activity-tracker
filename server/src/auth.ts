@@ -73,8 +73,10 @@ async function loginFunc(req: express.Request, res: express.Response) {
           result[0].userId,
         ]);
 
+ 
         logger.info(`Login success by ${cleantEU}`);
-
+        
+       
         const stringify = encrypWithCryptojs(level[0].level);
         res.status(200).json({
           message: "success",

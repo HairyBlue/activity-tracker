@@ -13,7 +13,6 @@ const categories = ref<Array<any>>([]);
 const clubs = ref<Array<any>>([]);
 const schoolYears = ref<Array<any>>([]);
 
-const category_uuid = ref<string>('');
 const club_uuid = ref<string>('');
 const activitySchoolYear = ref<string>(sdata.currentYearStr);
 const activitySemester = ref<string>('1');
@@ -22,8 +21,25 @@ const pageSize = ref<number>(20);
 const pageNumber = ref<number>(1);
 const searchFilter = ref<string>('');
 
-const activityData = ref<any[]>([]);
+const activityData = ref<any>({});
 const activityCount = ref<number>(0);
+
+
+function groupActivity(data: any) {
+
+ const shalowCopy = Object.assign({}, data);
+  for (let key in shalowCopy) {
+    shalowCopy[key]["categories"] = [];
+    for (let activity of shalowCopy[key]["activities"] ) {
+        shalowCopy[key]["categories"].push({
+          'uuid': activity.category_uuid,
+          'name': activity["categoryName"]
+        })
+    }
+  }
+ 
+  return shalowCopy;
+}
 
 function fetchData() {
   // console.log(user.getToken(), user.level);
@@ -38,16 +54,15 @@ function fetchData() {
         orderBy: orderBy.value,
         pageSize: pageSize.value,
         pageNumber: pageNumber.value,
-        category_uuid: category_uuid.value,
         club_uuid: club_uuid.value,
-        // searchFilter: searchFilter.value,
+        searchFilter: searchFilter.value,
       },
       beforeSend: function (xhr) {
         xhr.setRequestHeader('Authorization', `Bearer ${user.getToken()}`);
       },
     }).then((value) => {
-      // console.log(value);
-      activityData.value = value.data;
+      //console.log(value.data);
+      activityData.value = groupActivity(value.data);
     });
   }, 500);
 
@@ -61,16 +76,18 @@ function fetchData() {
       },
     }).then((value) => {
       // console.log(value);
-      activityCount.value = value.count != null ? value.count[0].count : 0;
+      activityCount.value = value.count[0].count;
+
+
     });
   }, 500);
 }
 
 watch(
-  [category_uuid, club_uuid, activitySchoolYear, activitySemester, orderBy, pageSize, pageNumber, searchFilter],
+  [club_uuid, activitySchoolYear, activitySemester, orderBy, pageSize, pageNumber, searchFilter],
   (
-    [new_category_uuid, new_club_uuid, new_activitySchoolYear, new_activitySemester, new_orderBy, new_pageSize, new_pageNumber, new_searchFilter],
-    [old_category_uuid, old_club_uuid, old_activitySchoolYear, old_activitySemester, old_orderBy, old_pageSize, old_pageNumber, old_searchFilter]
+    [new_club_uuid, new_activitySchoolYear, new_activitySemester, new_orderBy, new_pageSize, new_pageNumber, new_searchFilter],
+    [old_club_uuid, old_activitySchoolYear, old_activitySemester, old_orderBy, old_pageSize, old_pageNumber, old_searchFilter]
   ) => {
     // Check if any variable has changed
     // if (
@@ -86,11 +103,6 @@ watch(
     //   fetchData();
     // }
     // Handle changes and call fetchData if needed
-    if (new_category_uuid !== old_category_uuid) {
-      // console.log('category_uuid changed');
-      fetchData(); // Fetch data if category_uuid changes
-    }
-
     if (new_club_uuid !== old_club_uuid) {
       // console.log('club_uuid changed');
       fetchData(); // Fetch data if club_uuid changes
@@ -129,7 +141,7 @@ watch(
 );
 
 function resetFilter() {
-  const vars = [category_uuid, club_uuid, searchFilter];
+  const vars = [club_uuid, searchFilter];
   for (let variables of vars) {
     variables.value = '';
   }
@@ -177,21 +189,16 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="h-screen overflow-auto">
+  <div class="h-full">
+    <h2 class="text-4xl font-semibold text-center">Activity Record List</h2>
+    <h3 class="text-lg font-medium text-center italic">User filters below if you want to easily find the specific records</h3>
     <div class="p-2">
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap gap-1">
         <!-- Search -->
-        <!-- <div>
-          <input type="text" placeholder="Search here" class="input input-bordered input-primary w-full max-w-xs rounded-none" v-model="searchFilter" />
-        </div> -->
-        <!-- Club -->
         <div>
-          <select class="select select-primary w-full max-w-xs rounded-none" v-model="category_uuid">
-            <option disabled selected value="">Category</option>
-            <option v-for="category in categories" :value="category.category_uuid" :id="category.category_uuid">{{ category.categoryName }}</option>
-          </select>
+          <input type="text" placeholder="Search Activity Name Here" class="input input-bordered input-primary w-full max-w-xs rounded-none" v-model="searchFilter" />
         </div>
-        <!-- Category -->
+      
         <div>
           <select class="select select-primary w-full max-w-xs rounded-none" v-model="club_uuid">
             <option disabled selected value="">Club</option>
@@ -226,50 +233,77 @@ onMounted(() => {
         </div>
         <!-- REST -->
         <div>
-          <!-- <span class="font-8 text-xl"> | </span> -->
+          <span class="font-8 text-xl"> | </span>
           <button class="btn btn-primary btn-active" @click="resetFilter()">Reset Filter</button>
         </div>
       </div>
 
       <!-- TABLE -->
-      <div class="no-scrollbar h-screen overflow-auto" v-if="activityData.length > 0">
-        <table class="table">
+      <div class=" h-full overflow-x-auto">
+        <table class="table text-sm">
           <!-- head -->
           <thead>
-            <tr>
-              <th></th>
+            <tr class="text-base">
               <th>Club and Organization</th>
               <th>Activity Name</th>
-              <th>Category</th>
+              <th>Developmental Category</th>
               <th>Semester</th>
               <th>Date</th>
+              <th>No. Participants</th>
+              <th>Attendees</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(data, idx) in activityData" @click="clickEach(data.clubAcronym, data.clubName, data.activity_uuid)" class="hover:bg-slate-200">
-              <th>{{ idx + 1 }}</th>
-              <td>{{ data.clubAcronym.length > 0 ? data.clubAcronym : data.clubName }}</td>
-              <td>{{ data.activityName }}</td>
-              <td>{{ data.categoryName }}</td>
-              <td>{{ data.activitySemester }}</td>
-              <td>{{ data.activityDisplayDate }}</td>
-              <td>
-                <!-- Approved -->
-                <div v-if="data.activityStatus == 1" class="badge badge-success gap-2">approved</div>
-                <div v-else class="badge badge-warning gap-2">pending</div>
-                <!-- Approved -->
+            <!-- /@click="clickEach(data.clubAcronym, data.clubName, data.activity_same_record_uuid)"  -->
+            <tr v-for="data in activityData" class="border-2 border-solid border-gray-400">
+              <!-- <td>{{ idx + 1 }}</td> -->
+
+              <td class="align-top">{{ data["activities"][0].clubAcronym.length > 0 ? data["activities"][0].clubAcronym : data["activities"][0].clubName }}</td>
+              <td class="align-top">{{ data["activities"][0].activityName }}</td>
+              <td class="align-top">
+                <div v-for="category of data['categories']">
+                  <div class="p-1 bg-slate-200 mb-1">
+                    {{ category.name }}, 
+                  </div>
+                </div>
               </td>
+              <td class="align-top">{{ data["activities"][0].activitySemester }}</td>
+              <td class="align-top">              
+                <div v-for="date of data['activities'][0].activityDisplayDate.split('---')">
+                  <div class="p-1 bg-slate-200 mb-1">
+                    {{ date }}, 
+                  </div>
+                </div>
+              </td>
+
+
+              <td class="align-top">{{ data["activities"][0].activityNumberParticipants }}</td>
+              <td class="align-top">
+                <div v-for="attendees of JSON.parse(data['activities'][0].activityPersonel)">
+                  <div class="p-1 bg-slate-200 mb-1">
+                    {{ attendees }}, 
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <div class="flex flex-nowrap">
+                <!-- Approved -->
+                  <div v-if="data['activities'][0].activityStatus == 'APPROVED'" class="badge badge-success gap-2">{{ data["activities"][0].activityStatus.toLowerCase()  }}</div>
+                  <div v-else-if="data['activities'][0].activityStatus == 'DISAPPROVED'" class="badge badge-error gap-2">{{ data["activities"][0].activityStatus.toLowerCase()  }}</div>
+                  <div v-else-if="data['activities'][0].activityStatus == 'PENDING'" class="badge badge-warning gap-2">{{ data["activities"][0].activityStatus.toLowerCase()  }}</div>
+                  <div class="ml-2 badge badge-neutral gap-2" @click="clickEach(data['activities'][0].clubAcronym, data['activities'][0].clubName, data['activities'][0].activity_same_record_uuid)" > 
+                    view 
+                    <svg width="16px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M20 4L12 12M20 4V8.5M20 4H15.5M19 12.5V16.8C19 17.9201 19 18.4802 18.782 18.908C18.5903 19.2843 18.2843 19.5903 17.908 19.782C17.4802 20 16.9201 20 15.8 20H7.2C6.0799 20 5.51984 20 5.09202 19.782C4.71569 19.5903 4.40973 19.2843 4.21799 18.908C4 18.4802 4 17.9201 4 16.8V8.2C4 7.0799 4 6.51984 4.21799 6.09202C4.40973 5.71569 4.71569 5.40973 5.09202 5.21799C5.51984 5 6.07989 5 7.2 5H11.5" stroke="#c2c2c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                  </div>
+                <!-- Approved -->
+                </div>
+              </td>
+              
             </tr>
           </tbody>
         </table>
-      </div>
-      <div v-else>
-        <div class="mt-16 text-center text-4xl font-semibold text-gray-600">
-          <div>
-            <span>No data currently showed</span>
-          </div>
-        </div>
       </div>
       <!-- Pagination -->
       <div class="mt-10">

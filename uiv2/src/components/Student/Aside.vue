@@ -25,7 +25,7 @@ function isCurrentSelection(prout: string): boolean {
     <div class="h-full overflow-y-auto bg-gray-50 px-3 py-4 flex flex-col justify-between">
       <div>
         <div class="px-2 py-4">
-          <RouterLink to="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+          <RouterLink data-testid="header-title" to="/dashboard" class="flex items-center space-x-3 rtl:space-x-reverse">
             <img src="/logo.png" class="h-6" alt="CJC LOGO" />
             <span class="self-center whitespace-nowrap text-lg font-semibold">Activity Tracker</span>
           </RouterLink>
@@ -33,6 +33,7 @@ function isCurrentSelection(prout: string): boolean {
         <ul class="space-y-2 font-medium">
           <li>
             <RouterLink
+              data-testid="student-dashboard-link"
               to="/student/dashboard"
               :class="isCurrentSelection('/student/dashboard') ? 'bg-gray-200' : ''"
               class="group flex items-center rounded-lg p-2 text-gray-900 hover:bg-gray-100">
@@ -50,11 +51,12 @@ function isCurrentSelection(prout: string): boolean {
                   clip-rule="evenodd" />
               </svg>
 
-              <span class="ms-3 flex-1 whitespace-nowrap">Club and Origanization</span>
+              <span class="ms-3 flex-1 whitespace-nowrap">Club and Organization</span>
             </RouterLink>
           </li>
           <li>
             <RouterLink
+              data-testid="student-dashboard-activity-link"
               to="/student/dashboard/activity"
               :class="isCurrentSelection('/student/dashboard/activity') ? 'bg-gray-200' : ''"
               class="group flex items-center rounded-lg p-2 text-gray-900 hover:bg-gray-100">
@@ -74,7 +76,7 @@ function isCurrentSelection(prout: string): boolean {
       </div>
 
       <div>
-        <a href="#" @click="userLogOut()" class="group flex items-center rounded-lg p-2 text-gray-900 hover:bg-gray-100">
+        <a data-testid="student-sign-out" href="#" @click="userLogOut()" class="group flex items-center rounded-lg p-2 text-gray-900 hover:bg-gray-100">
           <svg
             class="h-5 w-5 flex-shrink-0 text-gray-500 transition duration-75 group-hover:text-gray-900"
             aria-hidden="true"
